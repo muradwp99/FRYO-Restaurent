@@ -72,3 +72,4 @@ errors.
 npm run dev                # in one terminal
 OUT_DIR=./_shots node scripts/verify.mjs
 ```
+# FRYO-Restaurent
