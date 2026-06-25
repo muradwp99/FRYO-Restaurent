@@ -1,26 +1,186 @@
 @import "tailwindcss";
 
+/*
+  FRYO brand theme — palette from Refences/Color-palette.jpeg
+  navy   #001840   royal #102A71   gold #F5C400   gold-light #FFDC5F   cream #FFFDF0
+*/
+@theme {
+  --color-ink: #00112e; /* deep navy blue — page base */
+  --color-ink-2: #001a40; /* slightly lifted panel base */
+  --color-navy: #001840;
+  --color-royal: #102a71;
+  --color-gold: #f5c400;
+  --color-gold-light: #ffdc5f;
+  --color-cream: #fffdf0;
+
+  --font-display: var(--font-bebas), "Bebas Neue", sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-ink);
+  --foreground: var(--color-cream);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  /* a restrained brand glow baked into the near-black base */
+  background-image:
+    radial-gradient(1100px 760px at 85% -10%, rgba(16, 42, 113, 0.35), transparent 60%),
+    radial-gradient(900px 700px at -10% 108%, rgba(16, 42, 113, 0.22), transparent 55%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  line-height: 0.92;
+}
+
+/* ----- custom cursor: hide native cursor on fine pointers ----- */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
+/* ----- scrollbar ----- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-royal);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+/* ----- selection ----- */
+::selection {
+  background: var(--color-gold);
+  color: var(--color-navy);
+}
+
+/* utility: outlined display text */
+.text-stroke-gold {
+  -webkit-text-stroke: 2px var(--color-gold);
+  color: transparent;
+}
+.text-stroke-cream {
+  -webkit-text-stroke: 1.5px rgba(255, 253, 240, 0.55);
+  color: transparent;
+}
+
+/* gold gradient text */
+.text-gold-grad {
+  background: linear-gradient(180deg, var(--color-gold-light), var(--color-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* thin scrollbar inside drawers */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-royal) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--color-royal);
+  border-radius: 999px;
+}
+
+/* minimalist surfaces */
+.panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 1.5rem;
+}
+.panel-hover {
+  transition: border-color 0.35s, background-color 0.35s, transform 0.35s;
+}
+.panel-hover:hover {
+  border-color: rgba(245, 196, 0, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+}
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent
+  );
+}
+.glow-gold {
+  box-shadow: 0 0 40px rgba(245, 196, 0, 0.25);
+}
+
+/* GSAP SplitText line masking — clips chars rising into view */
+.split-line {
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+.split-char,
+.split-word {
+  will-change: transform, opacity;
+}
+
+/* form inputs */
+.input-base {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  color: var(--color-cream);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-base::placeholder {
+  color: rgba(255, 253, 240, 0.35);
+}
+.input-base:focus {
+  border-color: rgba(245, 196, 0, 0.6);
+  box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.12);
+}
+/* date/time pickers tint */
+.input-base::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

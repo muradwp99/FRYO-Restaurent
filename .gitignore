@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# heavy source assets (raw frames / video / zips kept out of repo)
+/_source/
+/Hero-video_frames/
+/Hero-video_frames.zip
+/Refences/
+*.zip
+
+# heavy source PNGs (optimized into /public/frames-t)
+/public/frames-transparent/

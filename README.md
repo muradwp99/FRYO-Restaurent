@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FRYO — Restaurant Website
 
-## Getting Started
+A scroll-driven, animated marketing site for **FRYO** (burgers, wraps & pure fire),
+built with Next.js. The hero is an Apple-style scroll-scrubbed burger-assembly
+sequence with left/right copy that changes as you scroll, a mouse-reactive WebGL
+background, a custom cursor, and a working demo cart.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, TypeScript) + **Tailwind CSS v4**
+- **GSAP + ScrollTrigger** — scroll-scrubbed frame sequence & text choreography
+- **Lenis** — smooth scrolling (synced to ScrollTrigger)
+- **Three.js** — interactive, mouse-reactive shader background in the hero
+- **Framer Motion** — drawer transitions & section reveals
+- **Zustand** (+ `persist`) — cart and UI (drawer) state, saved to `localStorage`
+- **lucide-react** — icons
+- **Bebas Neue** (display) + **Inter** (body) via `next/font`
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Hero** (`src/components/hero/`)
+  - 220-frame burger-assembly sequence drawn to a `<canvas>`, scrubbed by scroll.
+  - Frame edges are feathered so the WebGL background shows through on the sides.
+  - 5 "scenes": each shows a different heading (left) + subheading & body (right).
+  - Frame preloader with a progress bar ("Firing up the grill…").
+- **Transparent navbar** — logo left; Home / Menu / About / Table Reservation /
+  Contact; **Featured** off-canvas trigger, account icon, and cart icon with a
+  live item count. Goes frosted on scroll. Mobile menu included.
+- **Featured drawer** (left off-canvas) — featured items with image, title,
+  price and add-to-cart.
+- **Cart drawer** (right) — quantities, remove, subtotal, checkout (demo).
+- **Menu** — filterable (All / Burgers / Wraps) cards for all 6 items.
+- **About / Reservation / Contact / Footer** — reservation form has a demo
+  submit state.
+- **Custom cursor** — gold dot + trailing ring that morphs and labels on hover
+  (desktop / fine-pointer only).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Brand colors (`src/app/globals.css` `@theme`)
 
-## Learn More
+`ink #00102b` · `navy #001840` · `royal #102A71` · `gold #F5C400` ·
+`gold-light #FFDC5F` · `cream #FFFDF0`
 
-To learn more about Next.js, take a look at the following resources:
+## Asset pipeline
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The raw 4K PNG frames and source video live in `_source/` and the project-root
+`Hero-video_frames/` (both git-ignored). Web assets are generated into
+`public/`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+node scripts/optimize-frames.mjs   # 4K PNGs -> public/frames/*.webp (1600px, ~16MB)
+node scripts/crop-products.mjs     # product thumbnails -> public/products/*.webp + og.webp
+```
 
-## Deploy on Vercel
+To swap in real product photography, drop images in `public/products/` and update
+the `image` paths in `src/lib/menu.ts`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Verify
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`scripts/verify.mjs` uses Playwright to load the site, scroll the hero through
+several frame states, exercise both drawers, and assert there are no runtime
+errors.
+
+```bash
+npm run dev                # in one terminal
+OUT_DIR=./_shots node scripts/verify.mjs
+```
