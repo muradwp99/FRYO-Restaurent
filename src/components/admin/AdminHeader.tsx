@@ -1,64 +1,88 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Bell, Search, ChevronRight } from "lucide-react";
+import { Bell, Search, Settings, ChevronRight } from "lucide-react";
+import { findNavByHref } from "./navConfig";
 
-const pageTitles: Record<string, string> = {
-  "/fryo-kanji": "Dashboard",
-  "/fryo-kanji/orders": "Order List",
-  "/fryo-kanji/customers": "Customers",
-  "/fryo-kanji/analytics": "Analytics",
-  "/fryo-kanji/reviews": "Reviews",
-  "/fryo-kanji/foods": "Foods",
-  "/fryo-kanji/calendar": "Calendar",
-  "/fryo-kanji/chat": "Chat",
-  "/fryo-kanji/wallet": "Wallet",
-};
+function openPalette() {
+  window.dispatchEvent(new Event("fryo:open-command-palette"));
+}
 
-function resolveTitle(pathname: string) {
-  if (pageTitles[pathname]) return pageTitles[pathname];
-  if (/^\/fryo-kanji\/orders\/\w+/.test(pathname)) return "Order Detail";
-  if (/^\/fryo-kanji\/customers\/\w+/.test(pathname)) return "Customer Detail";
-  if (/^\/fryo-kanji\/foods\/\w+/.test(pathname)) return "Food Detail";
-  return "Admin";
+function resolveMeta(pathname: string): { title: string; subtitle?: string; crumb?: string } {
+  if (pathname === "/fryo-kanji") return { title: "Dashboard", subtitle: "Hello Admin, welcome back!" };
+  const entry = findNavByHref(pathname);
+  if (entry) {
+    const label = entry.label.includes(" · ") ? entry.label.split(" · ").pop()! : entry.label;
+    return { title: label, crumb: entry.group };
+  }
+  if (/^\/fryo-kanji\/orders\/\w+/.test(pathname)) return { title: "Order Detail", crumb: "Main" };
+  if (/^\/fryo-kanji\/customers\/\w+/.test(pathname)) return { title: "Customer Detail", crumb: "People" };
+  if (/^\/fryo-kanji\/foods\/\w+/.test(pathname)) return { title: "Menu Item", crumb: "Catalog" };
+  return { title: "Admin" };
 }
 
 export function AdminHeader() {
-  const pathname = usePathname();
-  const title = resolveTitle(pathname ?? "");
+  const pathname = usePathname() ?? "";
+  const meta = resolveMeta(pathname);
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between gap-4 sticky top-0 z-20">
-      <div>
-        <div className="flex items-center gap-1 text-xs text-slate-400 mb-0.5">
-          <span>FRYO</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-600">{title}</span>
-        </div>
-        <h1 className="text-lg font-bold text-slate-900 leading-none">{title}</h1>
+    <header className="bg-navy/60 backdrop-blur-md border-b border-white/8 pl-16 pr-4 lg:px-6 py-4 flex items-center justify-between gap-4 sticky top-0 z-20">
+      {/* Title / breadcrumb */}
+      <div className="min-w-0">
+        {meta.crumb ? (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1 tracking-wide">
+            <span>Dashboard</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-slate-300 truncate">{meta.crumb}</span>
+          </div>
+        ) : (
+          meta.subtitle && <p className="text-xs text-slate-400 mb-1 tracking-wide">{meta.subtitle}</p>
+        )}
+        <h1 className="text-xl font-bold text-white leading-none tracking-wide truncate">{meta.title}</h1>
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* Search */}
-        <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 w-56 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-50 transition-all">
-          <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none w-full"
-          />
-        </div>
+      {/* Right controls */}
+      <div className="flex items-center gap-3">
+        {/* Search → command palette */}
+        <button
+          onClick={openPalette}
+          className="hidden md:flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 w-72 text-left hover:bg-white/8 hover:border-white/15 transition-all"
+        >
+          <Search className="w-4 h-4 text-slate-500 shrink-0" />
+          <span className="text-sm text-slate-500 tracking-wide">Search anything</span>
+          <kbd className="ml-auto text-[10px] text-slate-500 border border-white/10 rounded px-1.5 py-0.5">⌘K</kbd>
+        </button>
 
-        {/* Notifications */}
-        <button className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">
+        {/* Search icon (mobile) */}
+        <button
+          onClick={openPalette}
+          className="md:hidden p-2.5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+          aria-label="Search"
+        >
+          <Search className="w-5 h-5" />
+        </button>
+
+        {/* Bell */}
+        <button className="relative p-2.5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors" aria-label="Notifications">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-gold rounded-full ring-2 ring-navy" />
         </button>
 
-        {/* Avatar */}
-        <button className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition-opacity">
-          A
+        {/* Settings */}
+        <button className="hidden sm:block p-2.5 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors" aria-label="Settings">
+          <Settings className="w-5 h-5" />
         </button>
+
+        {/* Profile */}
+        <div className="flex items-center gap-3 pl-1">
+          <div className="hidden sm:block text-right">
+            <p className="text-sm font-semibold text-white leading-tight tracking-wide">Orlando Laurentius</p>
+            <p className="text-xs text-slate-400 tracking-wide">Admin</p>
+          </div>
+          <button className="w-10 h-10 rounded-full bg-gold flex items-center justify-center text-navy text-sm font-bold hover:bg-gold-light transition-colors shadow-md shadow-gold/20 shrink-0">
+            OL
+          </button>
+        </div>
       </div>
     </header>
   );

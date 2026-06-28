@@ -20,8 +20,9 @@ const HERO_VH = 330;
 const BOUNDARIES = [0.386, 0.754]; // scene boundaries in scroll progress
 
 type Scene = { heading: string; sub: string; body: string };
+type Stat = { target: number; suffix: string; label: string };
 
-const SCENES: Scene[] = [
+const DEFAULT_SCENES: Scene[] = [
   {
     heading: "Built\nBy Hand",
     sub: "Stacked To Order",
@@ -39,13 +40,16 @@ const SCENES: Scene[] = [
   },
 ];
 
-const STATS = [
+const DEFAULT_STATS: Stat[] = [
   { target: 25, suffix: "K+", label: "Orders Served" },
   { target: 9, suffix: "K+", label: "Happy Customers" },
   { target: 6, suffix: "", label: "Signature Dishes" },
 ];
 
-export function Hero() {
+export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
+  // The scroll animation assumes 3 scenes; only the copy is dynamic.
+  const SCENES = scenes && scenes.length === 3 ? scenes : DEFAULT_SCENES;
+  const STATS = stats && stats.length ? stats : DEFAULT_STATS;
   const openFeatured = useUI((s) => s.openFeatured);
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);

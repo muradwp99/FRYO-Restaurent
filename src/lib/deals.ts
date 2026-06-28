@@ -7,6 +7,8 @@ export type Deal = {
   tone: "gold" | "royal";
   cta: string;
   href: string;
+  /** CMS publish state — "Hidden" = not shown on the public site */
+  status?: "Active" | "Hidden";
 };
 
 export const DEALS: Deal[] = [

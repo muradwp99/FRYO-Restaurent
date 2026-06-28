@@ -1,355 +1,446 @@
 import {
-  TrendingUp,
-  ShoppingBag,
+  MessageSquareText,
   Users,
   DollarSign,
   ArrowUpRight,
-  Clock,
-  ChevronRight,
+  Star,
+  ShoppingBag,
+  Soup,
+  Utensils,
+  Monitor,
+  Package,
+  ClipboardCheck,
+  MoreHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 
-/* ── helpers ── */
-function statChange(pct: number) {
-  const up = pct >= 0;
-  return (
-    <span
-      className={`inline-flex items-center gap-0.5 text-xs font-medium ${up ? "text-emerald-600" : "text-red-500"}`}
-    >
-      <ArrowUpRight className={`w-3.5 h-3.5 ${up ? "" : "rotate-180"}`} />
-      {Math.abs(pct)}% vs last month
-    </span>
-  );
-}
-
-/* ── Revenue chart (SVG) ── */
+/* ─────────────────────────  Total Revenue — dual-line area chart  ───────────────────────── */
 function RevenueChart() {
-  const data = [3200, 4100, 3650, 5200, 6800, 7200, 5100];
-  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const yLabels = ["$2k", "$4k", "$6k", "$8k"];
+  const months = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+  const income = [8000, 10200, 9100, 12000, 16580, 13800, 15200, 14600];
+  const expense = [4800, 6000, 5400, 7000, 8200, 6800, 7400, 6600];
 
-  const W = 500, H = 140;
-  const padL = 36, padR = 10, padT = 10, padB = 24;
+  const W = 720, H = 300;
+  const padL = 44, padR = 16, padT = 24, padB = 34;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
-  const max = 8000, min = 0;
+  const max = 20000;
 
-  const pts = data.map((v, i) => ({
-    x: padL + (i / (data.length - 1)) * chartW,
-    y: padT + chartH - ((v - min) / (max - min)) * chartH,
-  }));
+  const xy = (arr: number[]) =>
+    arr.map((v, i) => ({
+      x: padL + (i / (arr.length - 1)) * chartW,
+      y: padT + chartH - (v / max) * chartH,
+    }));
 
-  let linePath = `M ${pts[0].x} ${pts[0].y}`;
-  for (let i = 1; i < pts.length; i++) {
-    const p = pts[i - 1], c = pts[i], dx = (c.x - p.x) / 3;
-    linePath += ` C ${p.x + dx} ${p.y} ${c.x - dx} ${c.y} ${c.x} ${c.y}`;
-  }
-  const areaPath =
-    linePath +
-    ` L ${pts[pts.length - 1].x} ${H - padB} L ${pts[0].x} ${H - padB} Z`;
+  const smooth = (pts: { x: number; y: number }[]) => {
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i - 1], c = pts[i], dx = (c.x - p.x) / 3;
+      d += ` C ${p.x + dx} ${p.y} ${c.x - dx} ${c.y} ${c.x} ${c.y}`;
+    }
+    return d;
+  };
+
+  const incPts = xy(income);
+  const expPts = xy(expense);
+  const incLine = smooth(incPts);
+  const incArea = incLine + ` L ${incPts[incPts.length - 1].x} ${H - padB} L ${incPts[0].x} ${H - padB} Z`;
+  const peak = incPts[4]; // Jul
+  const yTicks = [0, 5000, 10000, 15000, 20000];
 
   return (
     <div className="relative w-full">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none">
         <defs>
-          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+          <linearGradient id="incGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f5c400" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#f5c400" stopOpacity="0" />
           </linearGradient>
         </defs>
-        {/* gridlines */}
-        {yLabels.map((_, i) => {
-          const y = padT + (i / (yLabels.length - 1)) * chartH;
+
+        {/* gridlines + y labels */}
+        {yTicks.map((t, i) => {
+          const y = padT + chartH - (t / max) * chartH;
           return (
-            <line
-              key={i}
-              x1={padL}
-              y1={y}
-              x2={W - padR}
-              y2={y}
-              stroke="#e2e8f0"
-              strokeWidth="1"
-            />
+            <g key={i}>
+              <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="#1e293b" strokeWidth="1" />
+              <text x={padL - 8} y={y + 3.5} textAnchor="end" fontSize="10" fill="#64748b">
+                {t === 0 ? "0" : `${t / 1000}K`}
+              </text>
+            </g>
           );
         })}
-        {/* area fill */}
-        <path d={areaPath} fill="url(#areaGrad)" />
-        {/* line */}
-        <path
-          d={linePath}
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* dots */}
-        {pts.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r="4" fill="#10b981" stroke="white" strokeWidth="1.5" />
-        ))}
+
+        {/* income area + line */}
+        <path d={incArea} fill="url(#incGrad)" />
+        <path d={incLine} fill="none" stroke="#f5c400" strokeWidth="3" strokeLinecap="round" />
+        {/* expense line */}
+        <path d={smooth(expPts)} fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="0" />
+
+        {/* peak marker */}
+        <line x1={peak.x} y1={padT} x2={peak.x} y2={H - padB} stroke="#f5c400" strokeOpacity="0.3" strokeWidth="1" />
+        <circle cx={peak.x} cy={peak.y} r="6" fill="#f5c400" stroke="#001a40" strokeWidth="3" />
+
         {/* x labels */}
-        {pts.map((p, i) => (
-          <text
-            key={i}
-            x={p.x}
-            y={H - 4}
-            textAnchor="middle"
-            fontSize="9"
-            fill="#94a3b8"
-            fontFamily="ui-sans-serif,system-ui,sans-serif"
-          >
-            {labels[i]}
+        {incPts.map((p, i) => (
+          <text key={i} x={p.x} y={H - 10} textAnchor="middle" fontSize="10.5" fill="#64748b">
+            {months[i]}
           </text>
         ))}
-        {/* y labels */}
-        {yLabels.map((label, i) => {
-          const y = padT + chartH - (i / (yLabels.length - 1)) * chartH;
-          return (
-            <text
-              key={i}
-              x={padL - 4}
-              y={y + 3.5}
-              textAnchor="end"
-              fontSize="8.5"
-              fill="#94a3b8"
-              fontFamily="ui-sans-serif,system-ui,sans-serif"
-            >
-              {label}
-            </text>
-          );
-        })}
       </svg>
+
+      {/* tooltip on peak */}
+      <div
+        className="absolute -translate-x-1/2 -translate-y-full bg-navy border border-white/10 rounded-lg px-3 py-1.5 shadow-xl pointer-events-none"
+        style={{ left: `${(peak.x / W) * 100}%`, top: `${(peak.y / H) * 100}%` }}
+      >
+        <p className="text-[10px] text-slate-400 leading-none tracking-wide">July 2035</p>
+        <p className="text-sm font-bold text-white leading-tight mt-0.5 tracking-tight">$16,580</p>
+      </div>
     </div>
   );
 }
 
-/* ── Popular dishes ── */
-const popularDishes = [
-  { name: "Classic Smash Burger", orders: 342, pct: 100, color: "#10b981" },
-  { name: "FRYO Fries (Large)", orders: 287, pct: 84, color: "#f59e0b" },
-  { name: "Super Charger Wrap", orders: 218, pct: 64, color: "#3b82f6" },
-  { name: "BBQ Stack Burger", orders: 195, pct: 57, color: "#8b5cf6" },
+/* ─────────────────────────  Top Categories — donut  ───────────────────────── */
+function TopCategories() {
+  const segs = [
+    { label: "Seafood", value: 30, color: "#f5c400" },
+    { label: "Beverages", value: 25, color: "#ffdc5f" },
+    { label: "Dessert", value: 25, color: "#102a71" },
+    { label: "Pasta", value: 20, color: "#475569" },
+  ];
+  const R = 54, cx = 70, cy = 70, sw = 22, circ = 2 * Math.PI * R;
+  let offset = 0;
+
+  return (
+    <div className="flex items-center gap-6">
+      <svg viewBox="0 0 140 140" className="w-36 h-36 shrink-0 -rotate-90">
+        <circle cx={cx} cy={cy} r={R} fill="none" stroke="#102a71" strokeOpacity="0.4" strokeWidth={sw} />
+        {segs.map((s, i) => {
+          const dash = (s.value / 100) * circ;
+          const el = (
+            <circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r={R}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={sw}
+              strokeDasharray={`${dash} ${circ - dash}`}
+              strokeDashoffset={-offset}
+              strokeLinecap="butt"
+            />
+          );
+          offset += dash;
+          return el;
+        })}
+      </svg>
+      <div className="grid grid-cols-1 gap-2.5 flex-1">
+        {segs.map((s) => (
+          <div key={s.label} className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
+            <span className="text-xs text-slate-300 tracking-wide">{s.label}</span>
+            <span className="text-xs font-semibold text-white ml-auto tracking-wide">{s.value}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────  Orders Overview — bar chart  ───────────────────────── */
+function OrdersOverview() {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const vals = [120, 95, 140, 185, 150, 130, 145];
+  const max = 200;
+  const peak = 3;
+
+  return (
+    <div className="relative flex items-end gap-3 h-48 pt-8">
+      {vals.map((v, i) => {
+        const active = i === peak;
+        return (
+          <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end relative">
+            {active && (
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full bg-navy border border-white/10 rounded-lg px-3 py-1.5 shadow-xl whitespace-nowrap">
+                <p className="text-[10px] text-slate-400 leading-none tracking-wide">Thursday</p>
+                <p className="text-xs font-bold text-white leading-tight mt-0.5">
+                  185 <span className="font-normal text-slate-400">orders</span>
+                </p>
+              </div>
+            )}
+            <div
+              className={`w-full max-w-[42px] rounded-t-lg transition-all ${active ? "bg-gold shadow-lg shadow-gold/20" : "bg-white/10"}`}
+              style={{ height: `${(v / max) * 100}%` }}
+            />
+            <span className={`text-xs tracking-wide ${active ? "text-white font-semibold" : "text-slate-500"}`}>
+              {days[i]}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────────  Order Types — horizontal bars  ───────────────────────── */
+const orderTypes = [
+  { label: "Dine-In", pct: 45, count: 900, icon: Soup },
+  { label: "Takeaway", pct: 30, count: 600, icon: Package },
+  { label: "Online", pct: 25, count: 500, icon: Monitor },
 ];
 
-/* ── Recent orders ── */
+/* ─────────────────────────  Data  ───────────────────────── */
+const stats = [
+  { label: "Total Orders", value: "48,652", change: 1.58, icon: MessageSquareText },
+  { label: "Total Customer", value: "1,248", change: 0.42, icon: Users },
+  { label: "Total Revenue", value: "$215,860", change: 2.36, icon: DollarSign },
+];
+
 const recentOrders = [
-  { id: "ORD-1042", customer: "Alex Johnson", items: "Classic Burger ×2, Fries ×1", amount: "$32.40", status: "Preparing", time: "2m ago" },
-  { id: "ORD-1041", customer: "Maria Garcia", items: "Super Wrap ×1, Lemonade ×2", amount: "$18.70", status: "Ready", time: "8m ago" },
-  { id: "ORD-1040", customer: "James Lee", items: "BBQ Stack ×1", amount: "$14.20", status: "Delivered", time: "14m ago" },
-  { id: "ORD-1039", customer: "Priya Patel", items: "Classic Burger ×1, Fries ×2", amount: "$24.60", status: "Pending", time: "21m ago" },
-  { id: "ORD-1038", customer: "Tom Wilson", items: "Super Wrap ×2, FRYO Fries ×1", amount: "$31.50", status: "Delivered", time: "35m ago" },
+  { id: "ORD1025", menu: "Salmon Sushi Roll", cat: "Seafood", emoji: "🍣", qty: 3, amount: "$30.00", customer: "Dana White", status: "On Process" },
+  { id: "ORD1026", menu: "Spaghetti Carbonara", cat: "Pasta", emoji: "🍝", qty: 1, amount: "$15.00", customer: "Eve Carter", status: "Cancelled" },
+  { id: "ORD1027", menu: "Classic Cheeseburger", cat: "Burger", emoji: "🍔", qty: 1, amount: "$10.00", customer: "Charlie Brown", status: "Completed" },
+  { id: "ORD1028", menu: "Fiery Shrimp Salad", cat: "Seafood", emoji: "🥗", qty: 2, amount: "$24.00", customer: "Frank Miller", status: "Completed" },
 ];
 
 const statusStyle: Record<string, string> = {
-  Pending: "bg-amber-50 text-amber-700 ring-amber-200",
-  Preparing: "bg-blue-50 text-blue-700 ring-blue-200",
-  Ready: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  Delivered: "bg-slate-100 text-slate-500 ring-slate-200",
+  "On Process": "bg-blue-400/10 text-blue-300 ring-blue-400/20",
+  Completed: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/20",
+  Cancelled: "bg-white/5 text-slate-400 ring-white/10",
 };
 
-/* ── Page ── */
+const trendingMenus = [
+  { name: "Grilled Chicken Delight", cat: "Chicken", emoji: "🍗", rating: 4.9, orders: 350, price: "$18.00" },
+  { name: "Sunny Citrus Cake", cat: "Dessert", emoji: "🍰", rating: 4.8, orders: 400, price: "$8.50" },
+  { name: "Fiery Shrimp Salad", cat: "Seafood", emoji: "🥗", rating: 4.7, orders: 270, price: "$12.00" },
+];
+
+const recentActivity = [
+  { name: "Sylvester Quilt", role: "Inventory Manager", text: "updated inventory — 10 units of “Organic Chicken Breast”", time: "11:20 AM", icon: Package },
+  { name: "Maria Kings", role: "Kitchen Admin", text: "marked order #ORD1028 as completed", time: "11:00 AM", icon: ClipboardCheck },
+  { name: "William Smith", role: "Floor Manager", text: "restocked 12 units of “Brioche Buns”", time: "10:30 AM", icon: Package },
+];
+
+/* ─────────────────────────  Page  ───────────────────────── */
 export default function DashboardPage() {
   return (
-    <div className="space-y-6 max-w-[1400px]">
-      {/* Welcome */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Welcome back, Admin 👋</h2>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Saturday, 28 June 2026 — here's what's happening at FRYO today.
-          </p>
+    <div className="flex flex-col xl:flex-row gap-5 max-w-[1600px]">
+      {/* ===== Main column ===== */}
+      <div className="flex-1 min-w-0 space-y-5">
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {stats.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div key={s.label} className="bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-xl bg-gold/12 flex items-center justify-center shrink-0">
+                    <Icon className="w-6 h-6 text-gold" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-400 font-medium tracking-wide">{s.label}</p>
+                    <p className="text-2xl font-bold text-white leading-tight tracking-tight">{s.value}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-emerald-400 font-medium flex items-center gap-1 mt-3 tracking-wide">
+                  <ArrowUpRight className="w-3.5 h-3.5" /> {s.change}%
+                  <span className="text-slate-500 font-normal ml-1">vs last week</span>
+                </p>
+              </div>
+            );
+          })}
         </div>
-        <Link
-          href="/fryo-kanji/orders"
-          className="hidden sm:flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          View All Orders <ChevronRight className="w-4 h-4" />
-        </Link>
-      </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {[
-          {
-            label: "Total Revenue",
-            value: "$32,840",
-            change: 18.2,
-            icon: DollarSign,
-            iconBg: "bg-emerald-100",
-            iconColor: "text-emerald-600",
-          },
-          {
-            label: "Total Orders",
-            value: "847",
-            change: 12.4,
-            icon: ShoppingBag,
-            iconBg: "bg-blue-100",
-            iconColor: "text-blue-600",
-          },
-          {
-            label: "Customers",
-            value: "2,341",
-            change: 8.7,
-            icon: Users,
-            iconBg: "bg-violet-100",
-            iconColor: "text-violet-600",
-          },
-          {
-            label: "Avg. Order Value",
-            value: "$38.77",
-            change: 5.3,
-            icon: TrendingUp,
-            iconBg: "bg-amber-100",
-            iconColor: "text-amber-600",
-          },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <div
-              key={s.label}
-              className="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className={`${s.iconBg} p-2.5 rounded-lg flex-shrink-0`}>
-                <Icon className={`w-5 h-5 ${s.iconColor}`} />
-              </div>
+        {/* Revenue + Top Categories */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div className="lg:col-span-3 bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+            <div className="flex items-start justify-between mb-1">
               <div>
-                <p className="text-xs text-slate-500 font-medium mb-1">{s.label}</p>
-                <p className="text-2xl font-bold text-slate-900 leading-none mb-1.5">{s.value}</p>
-                {statChange(s.change)}
+                <p className="text-xs text-slate-400 font-medium tracking-wide">Total Revenue</p>
+                <p className="text-2xl font-bold text-white tracking-tight">$184,839</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-gold" />
+                  <span className="text-xs text-slate-400 tracking-wide">Income</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-500" />
+                  <span className="text-xs text-slate-400 tracking-wide">Expense</span>
+                </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+            <RevenueChart />
+          </div>
 
-      {/* Chart + Popular dishes */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Revenue chart */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-slate-900 text-sm">Revenue Overview</h3>
-              <p className="text-xs text-slate-400">Last 7 days</p>
+          <div className="lg:col-span-2 bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-white text-sm tracking-wide">Top Categories</h3>
+              <span className="text-xs text-slate-500 tracking-wide">This Month</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
-              <span className="text-xs text-slate-500">Revenue</span>
+            <TopCategories />
+          </div>
+        </div>
+
+        {/* Orders Overview + Order Types */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div className="lg:col-span-3 bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-white text-sm tracking-wide">Orders Overview</h3>
+              <span className="text-xs text-slate-500 tracking-wide">This Week</span>
+            </div>
+            <OrdersOverview />
+          </div>
+
+          <div className="lg:col-span-2 bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold text-white text-sm tracking-wide">Order Types</h3>
+              <span className="text-xs text-slate-500 tracking-wide">This Month</span>
+            </div>
+            <div className="space-y-5">
+              {orderTypes.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <div key={t.label}>
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                        <Icon className="w-4 h-4 text-slate-300" />
+                      </div>
+                      <span className="text-sm text-slate-200 font-medium tracking-wide">{t.label}</span>
+                      <span className="text-xs text-slate-500 tracking-wide">{t.pct}%</span>
+                      <span className="text-sm font-semibold text-white ml-auto tracking-wide">{t.count}</span>
+                    </div>
+                    <div className="h-2 bg-royal/30 rounded-full overflow-hidden">
+                      <div className="h-full bg-gold rounded-full" style={{ width: `${t.pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <RevenueChart />
         </div>
 
-        {/* Popular dishes */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900 text-sm">Popular Dishes</h3>
+        {/* Recent Orders */}
+        <div className="bg-ink-2 rounded-2xl border border-white/8 shadow-[0_1px_4px_rgba(0,0,0,0.5)] overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/8">
+            <h3 className="font-semibold text-white text-sm tracking-wide">Recent Orders</h3>
             <Link
-              href="/fryo-kanji/analytics"
-              className="text-xs text-emerald-600 hover:underline font-medium"
+              href="/fryo-kanji/orders"
+              className="text-xs font-semibold text-navy bg-gold hover:bg-gold-light px-3.5 py-2 rounded-lg transition-colors tracking-wide"
             >
-              See all
+              See All Orders
             </Link>
           </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-royal/20 border-b border-white/8">
+                  {["Order ID", "Menu", "Qty", "Amount", "Customer", "Status"].map((h) => (
+                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {recentOrders.map((o) => (
+                  <tr key={o.id} className="hover:bg-royal/10 transition-colors">
+                    <td className="px-5 py-3.5 font-mono text-xs font-semibold text-slate-300 tracking-wide">{o.id}</td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-linear-to-br from-navy to-royal border border-white/8 flex items-center justify-center text-lg shrink-0">
+                          {o.emoji}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-slate-100 font-medium tracking-wide truncate">{o.menu}</p>
+                          <p className="text-xs text-slate-500 tracking-wide">{o.cat}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-300 tracking-wide">{o.qty}</td>
+                    <td className="px-5 py-3.5 font-semibold text-white tracking-wide">{o.amount}</td>
+                    <td className="px-5 py-3.5 text-slate-200 tracking-wide whitespace-nowrap">{o.customer}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 tracking-wide whitespace-nowrap ${statusStyle[o.status]}`}>
+                        {o.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Right rail ===== */}
+      <aside className="xl:w-80 shrink-0 space-y-5">
+        {/* Trending Menus */}
+        <div className="bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white text-sm tracking-wide">Trending Menus</h3>
+            <span className="text-xs text-slate-500 tracking-wide">This Week</span>
+          </div>
           <div className="space-y-4">
-            {popularDishes.map((d) => (
-              <div key={d.name}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm text-slate-700 font-medium truncate pr-2">
-                    {d.name}
-                  </span>
-                  <span className="text-xs text-slate-400 flex-shrink-0">{d.orders} orders</span>
+            {trendingMenus.map((m) => (
+              <div key={m.name} className="group">
+                <div className="h-32 rounded-xl bg-linear-to-br from-navy to-royal border border-white/8 flex items-center justify-center text-5xl mb-2.5">
+                  {m.emoji}
                 </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${d.pct}%`, background: d.color }}
-                  />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-100 text-sm tracking-wide truncate">{m.name}</p>
+                    <p className="text-xs text-slate-500 tracking-wide">{m.cat}</p>
+                  </div>
+                  <span className="font-bold text-white text-sm shrink-0 tracking-wide">{m.price}</span>
+                </div>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <span className="flex items-center gap-1 text-xs text-slate-300 tracking-wide">
+                    <Star className="w-3.5 h-3.5 text-gold fill-gold" /> {m.rating}
+                  </span>
+                  <span className="flex items-center gap-1 text-xs text-slate-500 tracking-wide">
+                    <ShoppingBag className="w-3.5 h-3.5" /> {m.orders}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Recent orders */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h3 className="font-semibold text-slate-900 text-sm">Recent Orders</h3>
-          <Link
-            href="/fryo-kanji/orders"
-            className="text-xs text-emerald-600 hover:underline font-medium flex items-center gap-1"
-          >
-            View all <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                  Order #
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                  Customer
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">
-                  Items
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                  Amount
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                  Status
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">
-                  Time
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {recentOrders.map((o) => (
-                <tr key={o.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <Link
-                      href={`/fryo-kanji/orders/1`}
-                      className="font-mono text-xs font-semibold text-emerald-700 hover:underline"
-                    >
-                      {o.id}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-600 text-xs font-bold flex-shrink-0">
-                        {o.customer[0]}
-                      </div>
-                      <span className="text-slate-800 font-medium text-sm">{o.customer}</span>
+        {/* Recent Activity */}
+        <div className="bg-ink-2 rounded-2xl border border-white/8 p-5 shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white text-sm tracking-wide">Recent Activity</h3>
+            <MoreHorizontal className="w-4 h-4 text-slate-500" />
+          </div>
+          <div className="space-y-1">
+            {recentActivity.map((a, i) => {
+              const Icon = a.icon;
+              const last = i === recentActivity.length - 1;
+              return (
+                <div key={i} className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-royal/40 border border-white/8 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-slate-300" />
                     </div>
-                  </td>
-                  <td className="px-5 py-3.5 hidden md:table-cell">
-                    <span className="text-slate-500 text-xs">{o.items}</span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className="font-semibold text-slate-800">{o.amount}</span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ring-1 ${statusStyle[o.status]}`}
-                    >
-                      {o.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 hidden sm:table-cell">
-                    <span className="text-slate-400 text-xs flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {o.time}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    {!last && <div className="w-px flex-1 bg-white/8 my-1" />}
+                  </div>
+                  <div className={`min-w-0 ${last ? "" : "pb-4"}`}>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-sm font-semibold text-slate-100 tracking-wide">{a.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/8 text-slate-300 tracking-wide">{a.role}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5 leading-relaxed tracking-wide">{a.text}</p>
+                    <p className="text-[11px] text-slate-600 mt-1 tracking-wide">{a.time}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </aside>
     </div>
   );
 }

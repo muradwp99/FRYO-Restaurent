@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Tag } from "lucide-react";
-import { DEALS } from "@/lib/deals";
+import { DEALS, type Deal } from "@/lib/deals";
 import { Reveal } from "@/components/anim/Reveal";
 import { cn } from "@/lib/utils";
 
-export function DealsStrip() {
+export function DealsStrip({ deals = DEALS }: { deals?: Deal[] }) {
   return (
     <section className="relative py-24 md:py-32">
       <div className="mx-auto max-w-[1400px] px-5 md:px-10">
@@ -29,7 +29,7 @@ export function DealsStrip() {
         </div>
 
         <Reveal stagger className="grid gap-5 md:grid-cols-2">
-          {DEALS.slice(0, 4).map((deal) => (
+          {deals.slice(0, 4).map((deal) => (
             <Link
               key={deal.id}
               href={deal.href}

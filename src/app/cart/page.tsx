@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ArrowLeft, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart, selectTotal, selectCount } from "@/store/cart";
-import { DELIVERY_FEE, FREE_DELIVERY_OVER } from "@/store/order";
+import { useDeliveryConfig } from "@/lib/useDeliveryConfig";
 import { formatGBP } from "@/lib/utils";
 
 export default function CartPage() {
@@ -18,6 +18,7 @@ export default function CartPage() {
   const clear = useCart((s) => s.clear);
   const subtotal = useCart(selectTotal);
   const count = useCart(selectCount);
+  const { deliveryFee: DELIVERY_FEE, freeDeliveryOver: FREE_DELIVERY_OVER } = useDeliveryConfig();
 
   const delivery = subtotal >= FREE_DELIVERY_OVER || subtotal === 0 ? 0 : DELIVERY_FEE;
   const total = subtotal + delivery;

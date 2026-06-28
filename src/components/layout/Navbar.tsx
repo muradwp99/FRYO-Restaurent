@@ -15,7 +15,8 @@ const LINKS: NavLink[] = [
   { label: "Home", href: "/", type: "route" },
   { label: "Menu", href: "#menu", type: "scroll" },
   { label: "Deals", href: "/deals", type: "route" },
-  { label: "Reservations", href: "/reservations", type: "route" },
+  { label: "About", href: "/about", type: "route" },
+  { label: "Blog", href: "/blog", type: "route" },
   { label: "Contact", href: "#contact", type: "scroll" },
 ];
 

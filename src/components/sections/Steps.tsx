@@ -3,44 +3,37 @@
 import { MousePointerClick, SlidersHorizontal, ShoppingBag, Bike } from "lucide-react";
 import { Reveal } from "@/components/anim/Reveal";
 import { TextReveal } from "@/components/anim/TextReveal";
+import type { StepsContent } from "@/server/content";
 
-const STEPS = [
-  {
-    icon: MousePointerClick,
-    title: "Pick Your Build",
-    body: "Browse six signature burgers and wraps, each one stacked to order.",
-  },
-  {
-    icon: SlidersHorizontal,
-    title: "Make It Yours",
-    body: "Swap the bun, dial the spice, drop ingredients and pile on extras.",
-  },
-  {
-    icon: ShoppingBag,
-    title: "Drop It In The Bag",
-    body: "Build your order, review your bag and breeze through checkout.",
-  },
-  {
-    icon: Bike,
-    title: "Fired & Delivered",
-    body: "We fry it fresh and track it to your door in real time.",
-  },
-];
+const ICONS = [MousePointerClick, SlidersHorizontal, ShoppingBag, Bike];
 
-export function Steps() {
+const FALLBACK: StepsContent = {
+  eyebrow: "How It Works",
+  title: "Four Steps To Flavour",
+  steps: [
+    { title: "Pick Your Build", body: "Browse six signature burgers and wraps, each one stacked to order." },
+    { title: "Make It Yours", body: "Swap the bun, dial the spice, drop ingredients and pile on extras." },
+    { title: "Drop It In The Bag", body: "Build your order, review your bag and breeze through checkout." },
+    { title: "Fired & Delivered", body: "We fry it fresh and track it to your door in real time." },
+  ],
+};
+
+export function Steps({ content }: { content?: StepsContent }) {
+  const c = content ?? FALLBACK;
+  const STEPS = c.steps.map((s, i) => ({ ...s, icon: ICONS[i % ICONS.length] }));
   return (
     <section className="relative py-24 md:py-32">
       <div className="mx-auto max-w-[1400px] px-5 md:px-10">
         <div className="mb-14 text-center">
           <span className="font-display text-base tracking-[0.4em] text-gold">
-            How It Works
+            {c.eyebrow}
           </span>
           <TextReveal
             as="h2"
             by="words"
             className="mt-2 font-display text-5xl leading-none text-cream md:text-7xl"
           >
-            Four Steps To Flavour
+            {c.title}
           </TextReveal>
         </div>
 

@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import { getItem, MENU } from "@/lib/menu";
+import { getMenuItem } from "@/server/menu";
+import { getCustomizeOptions } from "@/server/modifiers";
 import { FoodCustomizer } from "@/components/food/FoodCustomizer";
 
-export function generateStaticParams() {
-  return MENU.map((m) => ({ id: m.id }));
-}
+// CMS-backed: reflect admin edits to this item immediately.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = getItem(id);
+  const item = await getMenuItem(id);
   return {
     title: item ? `${item.name} — FRYO` : "FRYO",
     description: item?.description,
@@ -25,7 +25,7 @@ export default async function FoodPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = getItem(id);
-  if (!item) notFound();
-  return <FoodCustomizer item={item} />;
+  const [item, options] = await Promise.all([getMenuItem(id), getCustomizeOptions()]);
+  if (!item || item.status === "Hidden") notFound();
+  return <FoodCustomizer item={item} options={options} />;
 }

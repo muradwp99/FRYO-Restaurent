@@ -2,29 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Send,
-  AtSign,
-  Globe,
-  MapPin,
-  Clock,
-  Phone,
-  Check,
-} from "lucide-react";
+import { ArrowUpRight, Send, MapPin, Clock, Phone, Check } from "lucide-react";
 import { Reveal } from "@/components/anim/Reveal";
+import { SocialLinks } from "@/components/ui/SocialLinks";
+import type { SocialLink } from "@/server/appearance";
+import type { ContactContent } from "@/server/content";
 
 const EXPLORE = [
   { label: "Menu", href: "/#menu" },
   { label: "Deals", href: "/deals" },
-  { label: "Reservations", href: "/reservations" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
   { label: "Your Bag", href: "/cart" },
-  { label: "Track Order", href: "/order-confirmed" },
 ];
 
-export function Footer() {
+export function Footer({ socials = [], contact }: { socials?: SocialLink[]; contact?: ContactContent }) {
   const [subscribed, setSubscribed] = useState(false);
   const [email, setEmail] = useState("");
+  const address = contact ? `${contact.addressLine1}, ${contact.addressLine2}` : "42 Flame Street, Manchester M1 4FR";
+  const phone = contact?.phone ?? "+44 161 555 0142";
+  const hours = contact ? `${contact.hoursDays} · ${contact.hoursTime}` : "Daily · 11:00 – 23:00";
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-ink pt-20">
@@ -73,13 +70,13 @@ export function Footer() {
             <ul className="mt-5 space-y-3 text-sm text-cream/60">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-                42 Flame Street, Manchester M1 4FR
+                {address}
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-gold" /> +44 161 555 0142
+                <Phone className="h-4 w-4 shrink-0 text-gold" /> {phone}
               </li>
               <li className="flex items-center gap-2">
-                <Clock className="h-4 w-4 shrink-0 text-gold" /> Daily · 11:00 – 23:00
+                <Clock className="h-4 w-4 shrink-0 text-gold" /> {hours}
               </li>
             </ul>
           </div>
@@ -117,19 +114,7 @@ export function Footer() {
                 {subscribed ? <Check className="h-5 w-5" /> : <Send className="h-5 w-5" />}
               </button>
             </form>
-            <div className="mt-5 flex gap-3">
-              {[AtSign, Send, Globe].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  data-cursor=""
-                  aria-label="social"
-                  className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/5 text-cream/80 transition-all hover:border-gold/60 hover:text-gold"
-                >
-                  <Icon className="h-5 w-5" />
-                </a>
-              ))}
-            </div>
+            <SocialLinks socials={socials} className="mt-5" />
           </div>
         </div>
 

@@ -6,7 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Bike, Store, CreditCard, Lock } from "lucide-react";
 import { useCart, selectTotal } from "@/store/cart";
-import { useOrder, DELIVERY_FEE, FREE_DELIVERY_OVER } from "@/store/order";
+import { useOrder } from "@/store/order";
+import { useDeliveryConfig } from "@/lib/useDeliveryConfig";
+import { createOrderAction } from "@/server/actions/orders";
 import { formatGBP, cn } from "@/lib/utils";
 
 export default function CheckoutPage() {
@@ -18,6 +20,7 @@ export default function CheckoutPage() {
   const clear = useCart((s) => s.clear);
   const subtotal = useCart(selectTotal);
   const place = useOrder((s) => s.place);
+  const { deliveryFee: DELIVERY_FEE, freeDeliveryOver: FREE_DELIVERY_OVER } = useDeliveryConfig();
 
   const [method, setMethod] = useState<"delivery" | "collection">("delivery");
   const [name, setName] = useState("");
@@ -31,7 +34,7 @@ export default function CheckoutPage() {
   const onPlace = (e: React.FormEvent) => {
     e.preventDefault();
     setPlacing(true);
-    place({
+    const placed = place({
       lines,
       subtotal,
       delivery,
@@ -40,6 +43,14 @@ export default function CheckoutPage() {
       address: method === "delivery" ? address : "Collection — 42 Flame Street",
       method,
     });
+    // Persist into the admin order pipeline (fire-and-forget; UX shouldn't block on it).
+    const itemsSummary = lines.map((l) => `${l.name} ×${l.qty}`).join(", ");
+    void createOrderAction({
+      id: placed.id,
+      customer: name || "Guest",
+      items: itemsSummary || "—",
+      amount: formatGBP(total),
+    }).catch(() => {});
     clear();
     router.push("/order-confirmed");
   };

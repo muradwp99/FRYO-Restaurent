@@ -1,4 +1,5 @@
-export type MenuCategory = "Burgers" | "Wraps";
+/** Category name — open string so the admin can add new categories beyond the originals. */
+export type MenuCategory = string;
 
 export type MenuItem = {
   id: string;
@@ -15,6 +16,8 @@ export type MenuItem = {
   rating: number;
   /** removable ingredients on the customize page */
   ingredients: string[];
+  /** CMS publish state — controls public visibility ("Hidden" = not shown on site) */
+  status?: "Active" | "Sold out" | "Hidden";
 };
 
 export const MENU: MenuItem[] = [

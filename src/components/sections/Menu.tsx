@@ -5,11 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
-import { MENU, type MenuCategory } from "@/lib/menu";
+import { MENU, type MenuItem } from "@/lib/menu";
 import { AddToCartButton } from "@/components/ui/AddToCartButton";
 import { formatGBP, cn } from "@/lib/utils";
-
-const FILTERS: ("All" | MenuCategory)[] = ["All", "Burgers", "Wraps"];
 
 const badgeStyles: Record<string, string> = {
   Classic: "bg-cream/10 text-cream",
@@ -18,9 +16,10 @@ const badgeStyles: Record<string, string> = {
   Signature: "bg-gold text-navy",
 };
 
-export function Menu() {
-  const [filter, setFilter] = useState<"All" | MenuCategory>("All");
-  const items = MENU.filter((m) => filter === "All" || m.category === filter);
+export function Menu({ items: source = MENU }: { items?: MenuItem[] }) {
+  const [filter, setFilter] = useState<string>("All");
+  const FILTERS = ["All", ...Array.from(new Set(source.map((m) => m.category)))];
+  const items = source.filter((m) => filter === "All" || m.category === filter);
 
   return (
     <section id="menu" className="relative scroll-mt-24 py-24 md:py-32">

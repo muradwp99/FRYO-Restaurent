@@ -20,35 +20,66 @@ import {
   SPICE,
   EXTRAS,
   type Config,
-  configExtraCost,
-  configSummary,
+  type Option,
   configKey,
 } from "@/lib/customize";
 import { useCart } from "@/store/cart";
 import { useUI } from "@/store/ui";
 import { formatGBP, cn } from "@/lib/utils";
 
-export function FoodCustomizer({ item }: { item: MenuItem }) {
+type SpiceOption = { id: string; name: string; level: number };
+export type CustomizeOptions = { buns: Option[]; sauces: Option[]; spice: SpiceOption[]; extras: Option[] };
+
+const FALLBACK: CustomizeOptions = { buns: BUNS, sauces: SAUCES, spice: SPICE, extras: EXTRAS };
+
+export function FoodCustomizer({ item, options }: { item: MenuItem; options?: CustomizeOptions }) {
+  // Fall back to code-level options if a group is empty/missing, so the page never breaks.
+  const opts: CustomizeOptions = {
+    buns: options?.buns?.length ? options.buns : FALLBACK.buns,
+    sauces: options?.sauces?.length ? options.sauces : FALLBACK.sauces,
+    spice: options?.spice?.length ? options.spice : FALLBACK.spice,
+    extras: options?.extras?.length ? options.extras : FALLBACK.extras,
+  };
+
   const add = useCart((s) => s.add);
   const openCart = useUI((s) => s.openCart);
   const rootRef = useRef<HTMLDivElement>(null);
 
+  // default spice option by matching the item's heat level, else first
+  const defaultSpice = opts.spice.find((s) => s.level === item.heat)?.id ?? opts.spice[0]?.id ?? "medium";
+
   const [config, setConfig] = useState<Config>({
-    bun: "brioche",
-    sauce: "bh-mayo",
-    spice: item.heat === 2 ? "hot" : item.heat === 1 ? "medium" : "mild",
+    bun: opts.buns[0]?.id ?? "brioche",
+    sauce: opts.sauces[0]?.id ?? "bh-mayo",
+    spice: defaultSpice,
     removed: [],
     extras: [],
   });
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const unitPrice = item.price + configExtraCost(config);
+  const extraCost = (cfg: Config) =>
+    (opts.buns.find((b) => b.id === cfg.bun)?.price ?? 0) +
+    (opts.sauces.find((s) => s.id === cfg.sauce)?.price ?? 0) +
+    cfg.extras.reduce((sum, id) => sum + (opts.extras.find((e) => e.id === id)?.price ?? 0), 0);
+
+  const summary = (cfg: Config) => {
+    const bun = opts.buns.find((b) => b.id === cfg.bun)?.name;
+    const sauce = opts.sauces.find((s) => s.id === cfg.sauce)?.name;
+    const spice = opts.spice.find((s) => s.id === cfg.spice)?.name;
+    const extras = cfg.extras.map((id) => opts.extras.find((e) => e.id === id)?.name).filter(Boolean);
+    const parts = [bun, sauce, spice && `${spice} spice`];
+    if (extras.length) parts.push(`+ ${extras.join(", ")}`);
+    if (cfg.removed.length) parts.push(`no ${cfg.removed.join(", ")}`);
+    return parts.filter(Boolean).join(" · ");
+  };
+
+  const unitPrice = item.price + extraCost(config);
   const total = unitPrice * qty;
 
   const heat = useMemo(
-    () => SPICE.find((s) => s.id === config.spice)?.level ?? 1,
-    [config.spice]
+    () => opts.spice.find((s) => s.id === config.spice)?.level ?? 1,
+    [config.spice, opts.spice]
   );
 
   useEffect(() => {
@@ -79,7 +110,7 @@ export function FoodCustomizer({ item }: { item: MenuItem }) {
       name: item.name,
       price: unitPrice,
       image: item.image,
-      options: configSummary(config),
+      options: summary(config),
       lineId: configKey(item.id, config),
       qty,
     });
@@ -173,7 +204,7 @@ export function FoodCustomizer({ item }: { item: MenuItem }) {
             {/* Bun */}
             <Group title="Choose Your Bun">
               <Chips
-                options={BUNS.map((b) => ({
+                options={opts.buns.map((b) => ({
                   id: b.id,
                   label: b.name,
                   note: b.note,
@@ -187,7 +218,7 @@ export function FoodCustomizer({ item }: { item: MenuItem }) {
             {/* Sauce */}
             <Group title="Choose Your Sauce">
               <Chips
-                options={SAUCES.map((s) => ({
+                options={opts.sauces.map((s) => ({
                   id: s.id,
                   label: s.name,
                   price: s.price,
@@ -200,7 +231,7 @@ export function FoodCustomizer({ item }: { item: MenuItem }) {
             {/* Spice */}
             <Group title="Spice Level">
               <div className="flex gap-2">
-                {SPICE.map((s) => (
+                {opts.spice.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => setConfig((c) => ({ ...c, spice: s.id }))}
@@ -245,7 +276,7 @@ export function FoodCustomizer({ item }: { item: MenuItem }) {
             {/* Extras */}
             <Group title="Add Extras">
               <div className="grid gap-2 sm:grid-cols-2">
-                {EXTRAS.map((e) => {
+                {opts.extras.map((e) => {
                   const on = config.extras.includes(e.id);
                   return (
                     <button

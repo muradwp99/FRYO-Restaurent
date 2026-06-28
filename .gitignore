@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# CMS runtime data store (seeded from src/lib/* on first run)
+/data/
+
 # production
 /build
 

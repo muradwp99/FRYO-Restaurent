@@ -5,7 +5,9 @@ import { gsap } from "gsap";
 import { Star, Quote } from "lucide-react";
 import { TextReveal } from "@/components/anim/TextReveal";
 
-const REVIEWS = [
+type Review = { name: string; text: string; stars: number };
+
+const FALLBACK_REVIEWS: Review[] = [
   { name: "Maya R.", text: "The Super Charger is dangerously good. That Algerian sauce should be illegal.", stars: 5 },
   { name: "Tariq B.", text: "Customised my BBQ burger exactly how I like it. Showed up hot and perfect.", stars: 5 },
   { name: "Jess W.", text: "Fastest delivery in the city and the wraps actually hold together. Obsessed.", stars: 5 },
@@ -14,7 +16,8 @@ const REVIEWS = [
   { name: "Danny O.", text: "Classic burger for £3.99 that tastes like a tenner. Mad value.", stars: 5 },
 ];
 
-export function Testimonials() {
+export function Testimonials({ reviews }: { reviews?: Review[] }) {
+  const REVIEWS = reviews && reviews.length > 0 ? reviews : FALLBACK_REVIEWS;
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
+import { getGlobalSeo } from "@/server/seo";
+import { getTracking } from "@/server/tracking";
+import { TrackingScripts } from "@/components/TrackingScripts";
+import { CustomCodeInjector } from "@/components/CustomCodeInjector";
 
 const bebas = Bebas_Neue({
   variable: "--font-bebas",
@@ -16,25 +20,33 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://fryo.example"),
-  title: "FRYO — Burgers, Wraps & Pure Fire",
-  description:
-    "FRYO serves smash-style burgers and loaded wraps. Classic, Super Charger and BBQ — freshly fried, boldly sauced.",
-  openGraph: {
-    title: "FRYO — Burgers, Wraps & Pure Fire",
-    description:
-      "Smash-style burgers and loaded wraps. Classic, Super Charger and BBQ.",
-    images: ["/og.webp"],
-  },
-  icons: { icon: "/favicon.ico" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getGlobalSeo();
+  let base: URL;
+  try {
+    base = new URL(seo.siteUrl);
+  } catch {
+    base = new URL("https://fryo.example");
+  }
+  return {
+    metadataBase: base,
+    title: { default: seo.defaultTitle, template: seo.titleTemplate },
+    description: seo.defaultDescription,
+    openGraph: {
+      title: seo.defaultTitle,
+      description: seo.defaultDescription,
+      images: [seo.ogImage],
+    },
+    icons: { icon: "/favicon.ico" },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const tracking = await getTracking();
   return (
     <html
       lang="en"
@@ -42,6 +54,8 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <Shell>{children}</Shell>
+        <TrackingScripts tracking={tracking} />
+        <CustomCodeInjector />
       </body>
     </html>
   );

@@ -6,12 +6,12 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Star, ArrowUpRight, Flame } from "lucide-react";
-import { MENU } from "@/lib/menu";
+import { MENU, type MenuItem } from "@/lib/menu";
 import { formatGBP } from "@/lib/utils";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
-export function Lineup() {
+export function Lineup({ items = MENU }: { items?: MenuItem[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +85,7 @@ export function Lineup() {
           className="flex gap-5 overflow-x-auto px-5 pb-4 md:overflow-visible md:px-10 [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: "none" }}
         >
-          {MENU.map((item, i) => (
+          {items.map((item, i) => (
             <article
               key={item.id}
               className="group relative flex h-[460px] w-[300px] shrink-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] md:h-[64vh] md:w-[clamp(320px,32vw,440px)]"
