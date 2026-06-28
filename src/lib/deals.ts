@@ -18,7 +18,7 @@ export const DEALS: Deal[] = [
     badge: "Save up to £2.50",
     tone: "gold",
     cta: "Claim Deal",
-    href: "/menu",
+    href: "/#menu",
   },
   {
     id: "free-delivery",
@@ -28,7 +28,7 @@ export const DEALS: Deal[] = [
     badge: "Always active",
     tone: "royal",
     cta: "Order Now",
-    href: "/menu",
+    href: "/#menu",
   },
   {
     id: "combo",
@@ -38,7 +38,7 @@ export const DEALS: Deal[] = [
     badge: "Save up to £3.00",
     tone: "gold",
     cta: "Build Combo",
-    href: "/menu",
+    href: "/#menu",
   },
   {
     id: "loyalty",
@@ -48,6 +48,6 @@ export const DEALS: Deal[] = [
     badge: "Every Thursday",
     tone: "royal",
     cta: "Order Thursday",
-    href: "/menu",
+    href: "/#menu",
   },
 ];

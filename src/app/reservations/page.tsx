@@ -38,6 +38,9 @@ export default function ReservationsPage() {
   const [occasion, setOccasion] = useState("none");
   const [done, setDone] = useState(false);
 
+  const today = new Date().toISOString().split("T")[0];
+  const maxDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setDone(true);
@@ -84,7 +87,7 @@ export default function ReservationsPage() {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Date">
-                  <input required type="date" className="input-base" />
+                  <input required type="date" min={today} max={maxDate} className="input-base" />
                 </Field>
                 <Field label="Time">
                   <input required type="time" className="input-base" />

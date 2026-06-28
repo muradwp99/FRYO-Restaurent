@@ -184,3 +184,9 @@ h1, h2, h3, h4, h5, .font-display {
     animation: none;
   }
 }
+
+/* Admin dashboard — restore normal cursor and override dark-site body */
+.admin-layout,
+.admin-layout * {
+  cursor: auto !important;
+}

@@ -24,6 +24,7 @@ const EXPLORE = [
 
 export function Footer() {
   const [subscribed, setSubscribed] = useState(false);
+  const [email, setEmail] = useState("");
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-ink pt-20">
@@ -94,14 +95,18 @@ export function Footer() {
               onSubmit={(e) => {
                 e.preventDefault();
                 setSubscribed(true);
+                setEmail("");
               }}
               className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1.5 pl-4"
             >
               <input
                 type="email"
                 required
-                placeholder="you@example.com"
-                className="min-w-0 flex-1 bg-transparent text-sm text-cream placeholder:text-cream/35 focus:outline-none"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={subscribed}
+                placeholder={subscribed ? "You're subscribed!" : "you@example.com"}
+                className="min-w-0 flex-1 bg-transparent text-sm text-cream placeholder:text-cream/35 focus:outline-none disabled:opacity-60"
               />
               <button
                 type="submit"

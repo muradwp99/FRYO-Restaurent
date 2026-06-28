@@ -53,9 +53,10 @@ export function FoodCustomizer({ item }: { item: MenuItem }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".fc-reveal", {
-        autoAlpha: 0,
-        y: 30,
+      gsap.set(".fc-reveal", { autoAlpha: 0, y: 30 });
+      gsap.to(".fc-reveal", {
+        autoAlpha: 1,
+        y: 0,
         duration: 0.6,
         stagger: 0.08,
         ease: "power3.out",

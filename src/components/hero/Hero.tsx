@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -114,7 +114,7 @@ export function Hero() {
   };
 
   /* ---------- timeline + creative text reveals ---------- */
-  useEffect(() => {
+  useLayoutEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
@@ -263,7 +263,6 @@ export function Hero() {
     return () => {
       window.removeEventListener("resize", onResize);
       ctx.revert();
-      splits.forEach((s) => s.revert());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);

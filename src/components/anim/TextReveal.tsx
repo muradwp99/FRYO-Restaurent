@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -20,7 +20,7 @@ type Props = {
 export function TextReveal({ children, className, as = "h2", by = "chars" }: Props) {
   const ref = useRef<HTMLElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -46,7 +46,6 @@ export function TextReveal({ children, className, as = "h2", by = "chars" }: Pro
     }, el);
 
     return () => {
-      split?.revert();
       ctx.revert();
     };
   }, [children, by]);

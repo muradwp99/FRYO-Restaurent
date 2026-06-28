@@ -30,9 +30,10 @@ export default function OrderConfirmedPage() {
         { width: "0%" },
         { width: `${(ACTIVE / (STEPS.length - 1)) * 100}%`, duration: 1.2, ease: "power2.out", delay: 0.3 }
       );
-      gsap.from(".oc-reveal", {
-        autoAlpha: 0,
-        y: 30,
+      gsap.set(".oc-reveal", { autoAlpha: 0, y: 30 });
+      gsap.to(".oc-reveal", {
+        autoAlpha: 1,
+        y: 0,
         duration: 0.6,
         stagger: 0.1,
         ease: "power3.out",
