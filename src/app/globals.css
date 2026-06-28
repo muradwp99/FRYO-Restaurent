@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
 /*
-  FRYO brand theme — palette from Refences/Color-palette.jpeg
-  navy   #001840   royal #102A71   gold #F5C400   gold-light #FFDC5F   cream #FFFDF0
+  FRYO brand theme — navy #001840  royal #102A71  gold #F5C400  gold-light #FFDC5F  cream #FFFDF0
 */
 @theme {
   --color-ink: #00112e; /* deep navy blue — page base */
