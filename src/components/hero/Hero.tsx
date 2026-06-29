@@ -19,6 +19,17 @@ const PAD = 4;
 const HERO_VH = 330;
 const BOUNDARIES = [0.386, 0.754]; // scene boundaries in scroll progress
 
+// Only fetch every Nth source frame (the scrub snaps to the nearest loaded one).
+// 171 image requests per homepage hit was overwhelming the host; this cuts it ~3x.
+const STRIDE = 3;
+const FRAMES: number[] = (() => {
+  const a: number[] = [];
+  for (let i = 0; i < FRAME_COUNT; i += STRIDE) a.push(i);
+  if (a[a.length - 1] !== FRAME_COUNT - 1) a.push(FRAME_COUNT - 1);
+  return a;
+})();
+const LOADED_COUNT = FRAMES.length;
+
 type Scene = { heading: string; sub: string; body: string };
 type Stat = { target: number; suffix: string; label: string };
 
@@ -70,21 +81,21 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
     const url = (i: number) =>
       `${base}/${String(i + 1).padStart(PAD, "0")}.webp`;
 
-    const images: HTMLImageElement[] = new Array(FRAME_COUNT);
-    for (let i = 0; i < FRAME_COUNT; i++) {
+    const images: HTMLImageElement[] = new Array(LOADED_COUNT);
+    for (let d = 0; d < LOADED_COUNT; d++) {
       const img = new Image();
       img.decoding = "async";
-      img.src = url(i);
+      img.src = url(FRAMES[d]);
       const done = () => {
         if (cancelled) return;
         loaded++;
-        setProgress(loaded / FRAME_COUNT);
-        if (i === 0 && img.complete) draw(0);
-        if (loaded === FRAME_COUNT) setReady(true);
+        setProgress(loaded / LOADED_COUNT);
+        if (d === 0 && img.complete) draw(0);
+        if (loaded === LOADED_COUNT) setReady(true);
       };
       img.onload = done;
       img.onerror = done;
-      images[i] = img;
+      images[d] = img;
     }
     imagesRef.current = images;
     return () => {
@@ -288,7 +299,7 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
         scrub: 0.6,
         onUpdate: (self) => {
           const p = self.progress;
-          const idx = Math.round(p * (FRAME_COUNT - 1));
+          const idx = Math.round(p * (LOADED_COUNT - 1));
           if (idx !== currentFrame.current) draw(idx);
           setActive(p < BOUNDARIES[0] ? 0 : p < BOUNDARIES[1] ? 1 : 2);
           if (hintRef.current) {

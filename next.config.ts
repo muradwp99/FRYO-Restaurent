@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
     cpus: 1,
     workerThreads: false,
   },
+
+  // The hero frame images never change — cache them hard so a browser only ever
+  // fetches each one once (no re-requests on repeat visits / client navigation).
+  async headers() {
+    return [
+      {
+        source: "/frames-t/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/frames-t-sm/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
