@@ -6,7 +6,7 @@ import { TextReveal } from "@/components/anim/TextReveal";
 import { BlogGrid } from "@/components/blog/BlogGrid";
 import { Footer } from "@/components/sections/Footer";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "The Journal",

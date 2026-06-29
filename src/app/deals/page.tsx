@@ -5,7 +5,7 @@ import { getPageMetadata } from "@/server/seo";
 import { Reveal } from "@/components/anim/Reveal";
 import { DealCard } from "@/components/deals/DealCard";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export function generateMetadata() {
   return getPageMetadata("/deals");

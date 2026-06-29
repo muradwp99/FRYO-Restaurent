@@ -11,7 +11,7 @@ import { Perks } from "@/components/sections/Perks";
 import { CTABand } from "@/components/sections/CTABand";
 import { Footer } from "@/components/sections/Footer";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export function generateMetadata() {
   return getPageMetadata("/menu");

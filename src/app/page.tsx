@@ -26,7 +26,7 @@ import { getPageMetadata } from "@/server/seo";
 import { SchemaScript } from "@/components/SchemaScript";
 
 // CMS-backed: always reflect the latest admin edits.
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export function generateMetadata() {
   return getPageMetadata("/");

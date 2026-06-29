@@ -9,7 +9,7 @@ import { Reveal } from "@/components/anim/Reveal";
 import { AboutValues } from "@/components/about/AboutValues";
 import { Footer } from "@/components/sections/Footer";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "About",

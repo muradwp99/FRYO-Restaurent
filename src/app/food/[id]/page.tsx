@@ -10,7 +10,7 @@ import { ProductReviews } from "@/components/sections/ProductReviews";
 import { Footer } from "@/components/sections/Footer";
 
 // CMS-backed: reflect admin edits to this item immediately.
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
