@@ -10,25 +10,60 @@ if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
 type Review = { name: string; text: string; stars: number };
 type Header = { eyebrow: string; title: string };
-const HEADER_FALLBACK: Header = { eyebrow: "Word On The Street", title: "Loved By The Hungry" };
+const HEADER_FALLBACK: Header = {
+  eyebrow: "Word On The Street",
+  title: "Loved By The Hungry",
+};
 
 const FALLBACK_REVIEWS: Review[] = [
-  { name: "Maya R.", text: "The Super Charger is dangerously good. That Algerian sauce should be illegal.", stars: 5 },
-  { name: "Tariq B.", text: "Customised my BBQ burger exactly how I like it. Showed up hot and perfect.", stars: 5 },
-  { name: "Jess W.", text: "Fastest delivery in the city and the wraps actually hold together. Obsessed.", stars: 5 },
-  { name: "Leon K.", text: "Been three times this week. The brioche bun is unreal. Send help.", stars: 5 },
-  { name: "Priya S.", text: "Minimalist app, maximalist flavour. The build-your-own flow is so smooth.", stars: 4 },
-  { name: "Danny O.", text: "Classic burger for £3.99 that tastes like a tenner. Mad value.", stars: 5 },
+  {
+    name: "Maya R.",
+    text: "The Super Charger is dangerously good. That Algerian sauce should be illegal.",
+    stars: 5,
+  },
+  {
+    name: "Tariq B.",
+    text: "Customised my BBQ burger exactly how I like it. Showed up hot and perfect.",
+    stars: 5,
+  },
+  {
+    name: "Jess W.",
+    text: "Fastest delivery in the city and the wraps actually hold together. Obsessed.",
+    stars: 5,
+  },
+  {
+    name: "Leon K.",
+    text: "Been three times this week. The brioche bun is unreal. Send help.",
+    stars: 5,
+  },
+  {
+    name: "Priya S.",
+    text: "Minimalist app, maximalist flavour. The build-your-own flow is so smooth.",
+    stars: 4,
+  },
+  {
+    name: "Danny O.",
+    text: "Classic burger for £3.99 that tastes like a tenner. Mad value.",
+    stars: 5,
+  },
 ];
 
-export function Testimonials({ reviews, header = HEADER_FALLBACK }: { reviews?: Review[]; header?: Header }) {
+export function Testimonials({
+  reviews,
+  header = HEADER_FALLBACK,
+}: {
+  reviews?: Review[];
+  header?: Header;
+}) {
   const REVIEWS = reviews && reviews.length > 0 ? reviews : FALLBACK_REVIEWS;
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduce) return;
 
     let io: IntersectionObserver | null = null;
@@ -39,7 +74,7 @@ export function Testimonials({ reviews, header = HEADER_FALLBACK }: { reviews?: 
         duration: 28,
         ease: "none",
         repeat: -1,
-        modifiers: { x: (x) => `${(parseFloat(x) % half)}px` },
+        modifiers: { x: (x) => `${parseFloat(x) % half}px` },
       });
       const enter = () => gsap.to(tween, { timeScale: 0, duration: 0.6 });
       const leave = () => gsap.to(tween, { timeScale: 1, duration: 0.6 });

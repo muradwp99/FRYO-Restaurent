@@ -67,7 +67,8 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
     let loaded = 0;
     const small = window.matchMedia("(max-width: 767px)").matches;
     const base = small ? "/frames-t-sm" : "/frames-t";
-    const url = (i: number) => `${base}/${String(i + 1).padStart(PAD, "0")}.webp`;
+    const url = (i: number) =>
+      `${base}/${String(i + 1).padStart(PAD, "0")}.webp`;
 
     const images: HTMLImageElement[] = new Array(FRAME_COUNT);
     for (let i = 0; i < FRAME_COUNT; i++) {
@@ -185,26 +186,57 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
         const p = parts[i];
         hide(p);
         const tl = gsap.timeline();
-        tl.to(p.eyebrow, { y: 0, autoAlpha: 1, duration: 0.4, ease: "power2.out" })
+        tl.to(p.eyebrow, {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.4,
+          ease: "power2.out",
+        })
           .to(
             p.headChars,
-            { yPercent: 0, autoAlpha: 1, rotateX: 0, stagger: 0.035, duration: 0.75, ease: "back.out(1.6)" },
-            0
+            {
+              yPercent: 0,
+              autoAlpha: 1,
+              rotateX: 0,
+              stagger: 0.035,
+              duration: 0.75,
+              ease: "back.out(1.6)",
+            },
+            0,
           )
           .to(
             p.subChars,
-            { yPercent: 0, autoAlpha: 1, stagger: 0.014, duration: 0.5, ease: "power3.out" },
-            0.18
+            {
+              yPercent: 0,
+              autoAlpha: 1,
+              stagger: 0.014,
+              duration: 0.5,
+              ease: "power3.out",
+            },
+            0.18,
           )
           .to(
             p.bodyLines,
-            { y: 0, autoAlpha: 1, stagger: 0.09, duration: 0.5, ease: "power2.out" },
-            0.34
+            {
+              y: 0,
+              autoAlpha: 1,
+              stagger: 0.09,
+              duration: 0.5,
+              ease: "power2.out",
+            },
+            0.34,
           )
           .to(
             p.btns,
-            { y: 0, autoAlpha: 1, scale: 1, stagger: 0.12, duration: 0.5, ease: "back.out(1.7)" },
-            0.46
+            {
+              y: 0,
+              autoAlpha: 1,
+              scale: 1,
+              stagger: 0.12,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+            },
+            0.46,
           );
         return tl;
       };
@@ -218,7 +250,7 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
         gsap.fromTo(
           statsWrap,
           { autoAlpha: 0, y: 24 },
-          { autoAlpha: 1, y: 0, duration: 0.7, delay: 0.5, ease: "power2.out" }
+          { autoAlpha: 1, y: 0, duration: 0.7, delay: 0.5, ease: "power2.out" },
         );
         section.querySelectorAll<HTMLElement>(".stat-num").forEach((el) => {
           const t = Number(el.dataset.target || "0");
@@ -239,7 +271,11 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
       let active = 0;
       const setActive = (i: number) => {
         if (i === active) return;
-        gsap.to(scenes[active], { autoAlpha: 0, duration: 0.3, ease: "power2.in" });
+        gsap.to(scenes[active], {
+          autoAlpha: 0,
+          duration: 0.3,
+          ease: "power2.in",
+        });
         active = i;
         gsap.set(scenes[i], { autoAlpha: 1 });
         reveal(i);

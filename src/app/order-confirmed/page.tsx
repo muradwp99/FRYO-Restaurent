@@ -28,7 +28,12 @@ export default function OrderConfirmedPage() {
       gsap.fromTo(
         barRef.current,
         { width: "0%" },
-        { width: `${(ACTIVE / (STEPS.length - 1)) * 100}%`, duration: 1.2, ease: "power2.out", delay: 0.3 }
+        {
+          width: `${(ACTIVE / (STEPS.length - 1)) * 100}%`,
+          duration: 1.2,
+          ease: "power2.out",
+          delay: 0.3,
+        },
       );
       gsap.set(".oc-reveal", { autoAlpha: 0, y: 30 });
       gsap.to(".oc-reveal", {
@@ -56,7 +61,9 @@ export default function OrderConfirmedPage() {
     return (
       <div className="mx-auto max-w-[700px] px-5 pb-24 pt-36 text-center">
         <h1 className="font-display text-5xl text-cream">No recent orders</h1>
-        <p className="mt-3 text-cream/55">Place an order and track it here in real time.</p>
+        <p className="mt-3 text-cream/55">
+          Place an order and track it here in real time.
+        </p>
         <Link
           href="/#menu"
           className="mt-8 inline-flex rounded-full bg-gold px-7 py-3 font-display text-xl tracking-widest text-navy hover:bg-gold-light"
@@ -79,7 +86,8 @@ export default function OrderConfirmedPage() {
         </h1>
         <p className="mt-3 text-cream/60">
           Thanks {last.name.split(" ")[0]} — your order{" "}
-          <span className="font-mono text-gold">{last.id}</span> is in the kitchen.
+          <span className="font-mono text-gold">{last.id}</span> is in the
+          kitchen.
         </p>
       </div>
 
@@ -130,7 +138,13 @@ export default function OrderConfirmedPage() {
           {last.lines.map((l) => (
             <li key={l.lineId} className="flex items-center gap-3">
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                <Image src={l.image} alt={l.name} fill sizes="56px" className="object-cover" />
+                <Image
+                  src={l.image}
+                  alt={l.name}
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-display text-xl tracking-wide text-cream">

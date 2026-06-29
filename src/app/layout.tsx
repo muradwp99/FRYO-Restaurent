@@ -47,7 +47,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [tracking, appearance] = await Promise.all([getTracking(), getAppearance()]);
+  const [tracking, appearance] = await Promise.all([
+    getTracking(),
+    getAppearance(),
+  ]);
   return (
     <html
       lang="en"
@@ -55,7 +58,11 @@ export default async function RootLayout({
       className={`${bebas.variable} ${inter.variable} h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-full">
-        <Shell nav={appearance.nav} header={appearance.header} announcement={appearance.announcement}>
+        <Shell
+          nav={appearance.nav}
+          header={appearance.header}
+          announcement={appearance.announcement}
+        >
           {children}
         </Shell>
         <TrackingScripts tracking={tracking} />

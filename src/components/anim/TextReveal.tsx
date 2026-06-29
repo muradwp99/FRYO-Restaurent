@@ -6,7 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cn } from "@/lib/utils";
 
-if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger, SplitText);
+if (typeof window !== "undefined")
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 
 type Props = {
   children: string;
@@ -17,13 +18,20 @@ type Props = {
 };
 
 /** Scroll-triggered masked reveal for display text. */
-export function TextReveal({ children, className, as = "h2", by = "chars" }: Props) {
+export function TextReveal({
+  children,
+  className,
+  as = "h2",
+  by = "chars",
+}: Props) {
   const ref = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduce) return;
 
     let split: SplitText | null = null;
@@ -33,7 +41,11 @@ export function TextReveal({ children, className, as = "h2", by = "chars" }: Pro
         linesClass: "split-line",
       });
       const targets =
-        by === "chars" ? split.chars : by === "words" ? split.words : split.lines;
+        by === "chars"
+          ? split.chars
+          : by === "words"
+            ? split.words
+            : split.lines;
       gsap.from(targets, {
         yPercent: 120,
         autoAlpha: 0,

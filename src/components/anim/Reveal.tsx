@@ -31,10 +31,14 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     const ctx = gsap.context(() => {
-      const targets = stagger ? (gsap.utils.toArray(el.children) as HTMLElement[]) : [el];
+      const targets = stagger
+        ? (gsap.utils.toArray(el.children) as HTMLElement[])
+        : [el];
       if (reduce) {
         gsap.set(targets, { opacity: 1, y: 0 });
         return;
@@ -50,7 +54,7 @@ export function Reveal({
           ease: "power3.out",
           stagger: stagger ? 0.1 : 0,
           scrollTrigger: { trigger: el, start, once: true },
-        }
+        },
       );
     }, el);
 

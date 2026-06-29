@@ -19,7 +19,13 @@ const LINEUP_FALLBACK: LineupContent = {
   ctaLabel: "Customize",
 };
 
-export function Lineup({ items = MENU, content = LINEUP_FALLBACK }: { items?: MenuItem[]; content?: LineupContent }) {
+export function Lineup({
+  items = MENU,
+  content = LINEUP_FALLBACK,
+}: {
+  items?: MenuItem[];
+  content?: LineupContent;
+}) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -36,9 +42,11 @@ export function Lineup({ items = MENU, content = LINEUP_FALLBACK }: { items?: Me
       const mm = gsap.matchMedia();
 
       mm.add("(min-width: 768px)", () => {
-        const distance = () => Math.max(track.scrollWidth - window.innerWidth + 96, 0);
+        const distance = () =>
+          Math.max(track.scrollWidth - window.innerWidth + 96, 0);
         // tall section gives the vertical scroll room the sticky inner needs
-        const setHeight = () => gsap.set(section, { height: window.innerHeight + distance() });
+        const setHeight = () =>
+          gsap.set(section, { height: window.innerHeight + distance() });
         setHeight();
 
         gsap.to(track, {
@@ -61,8 +69,13 @@ export function Lineup({ items = MENU, content = LINEUP_FALLBACK }: { items?: Me
             {
               scale: 1,
               ease: "none",
-              scrollTrigger: { trigger: section, start: "top top", end: () => "+=" + distance(), scrub: true },
-            }
+              scrollTrigger: {
+                trigger: section,
+                start: "top top",
+                end: () => "+=" + distance(),
+                scrub: true,
+              },
+            },
           );
         });
 
@@ -84,7 +97,8 @@ export function Lineup({ items = MENU, content = LINEUP_FALLBACK }: { items?: Me
             {content.eyebrow}
           </span>
           <h2 className="mt-2 font-display text-5xl leading-none text-cream md:text-7xl">
-            {content.title} <span className="text-gold-grad">{content.titleAccent}</span>
+            {content.title}{" "}
+            <span className="text-gold-grad">{content.titleAccent}</span>
           </h2>
         </div>
 

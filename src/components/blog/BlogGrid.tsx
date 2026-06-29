@@ -29,7 +29,9 @@ export function BlogGrid({ posts }: { posts: BlogPost[] }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>(".blog-card");
       if (reduce) {
@@ -63,13 +65,18 @@ export function BlogGrid({ posts }: { posts: BlogPost[] }) {
     return (
       <div className="py-24 text-center">
         <p className="text-5xl mb-4">📝</p>
-        <p className="font-display text-3xl text-cream/70">No stories yet — check back soon.</p>
+        <p className="font-display text-3xl text-cream/70">
+          No stories yet — check back soon.
+        </p>
       </div>
     );
   }
 
   return (
-    <div ref={ref} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      ref={ref}
+      className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+    >
       {posts.map((p, i) => (
         <Link
           key={p.id}
@@ -77,8 +84,12 @@ export function BlogGrid({ posts }: { posts: BlogPost[] }) {
           data-cursor="READ"
           className="blog-card group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] transition-colors hover:border-gold/40"
         >
-          <div className={`relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br ${GRADIENTS[i % GRADIENTS.length]}`}>
-            <span className="text-6xl transition-transform duration-500 group-hover:scale-110">{EMOJI[p.category] ?? "🍔"}</span>
+          <div
+            className={`relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br ${GRADIENTS[i % GRADIENTS.length]}`}
+          >
+            <span className="text-6xl transition-transform duration-500 group-hover:scale-110">
+              {EMOJI[p.category] ?? "🍔"}
+            </span>
             <span className="absolute left-4 top-4 rounded-full bg-ink/70 px-3 py-1 font-body text-xs font-semibold uppercase tracking-wide text-gold backdrop-blur">
               {p.category}
             </span>
@@ -88,7 +99,9 @@ export function BlogGrid({ posts }: { posts: BlogPost[] }) {
             <h2 className="font-body text-xl font-semibold leading-snug tracking-tight text-cream transition-colors group-hover:text-gold">
               {p.title}
             </h2>
-            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-cream/55">{p.excerpt}</p>
+            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-cream/55">
+              {p.excerpt}
+            </p>
 
             <div className="mt-auto flex items-center justify-between gap-2 pt-5">
               <span className="flex items-center gap-1.5 text-xs text-cream/45">
