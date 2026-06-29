@@ -83,22 +83,40 @@ async function fileWrite(name: string, json: string): Promise<void> {
 
 /* ── unified read/write with DB → file fallback ── */
 
+/**
+ * Short-lived in-process cache. Cuts repeated DB hits within a request burst
+ * (e.g. the homepage reads ~14 collections) so each request finishes faster and
+ * frees its worker — important on process-limited shared hosting. Writes update
+ * the cache immediately, and a 10s TTL keeps it from going stale.
+ */
+const readCache = new Map<string, { raw: string | null; exp: number }>();
+const CACHE_TTL_MS = 10_000;
+
 async function readRaw(name: string): Promise<string | null> {
+  const cached = readCache.get(name);
+  if (cached && cached.exp > Date.now()) return cached.raw;
+
+  let raw: string | null;
   if (useDb()) {
     try {
-      return await dbReadRaw(name);
+      raw = await dbReadRaw(name);
     } catch (err) {
       console.error(`[store] MySQL read failed for "${name}" — falling back to file store.`, err);
       dbCooldownUntil = Date.now() + DB_COOLDOWN_MS;
+      raw = await fileRead(name);
     }
+  } else {
+    raw = await fileRead(name);
   }
-  return fileRead(name);
+  readCache.set(name, { raw, exp: Date.now() + CACHE_TTL_MS });
+  return raw;
 }
 
 async function writeRaw(name: string, json: string): Promise<void> {
   if (useDb()) {
     try {
       await dbWriteRaw(name, json);
+      readCache.set(name, { raw: json, exp: Date.now() + CACHE_TTL_MS });
       return;
     } catch (err) {
       console.error(`[store] MySQL write failed for "${name}" — falling back to file store.`, err);
@@ -106,6 +124,7 @@ async function writeRaw(name: string, json: string): Promise<void> {
     }
   }
   await fileWrite(name, json);
+  readCache.set(name, { raw: json, exp: Date.now() + CACHE_TTL_MS });
 }
 
 export async function readCollection<T>(name: string, seed: T[]): Promise<T[]> {

@@ -21,11 +21,12 @@ export function getPool(): mysql.Pool {
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
       waitForConnections: true,
-      connectionLimit: 5,
-      maxIdle: 2,
-      idleTimeout: 30_000,
-      connectTimeout: 12_000,
-      enableKeepAlive: true,
+      // Keep the footprint tiny for shared/CloudLinux hosting (process/conn limits).
+      connectionLimit: 3,
+      maxIdle: 1,
+      idleTimeout: 15_000,
+      connectTimeout: 10_000,
+      enableKeepAlive: false,
     });
   }
   return pool;
