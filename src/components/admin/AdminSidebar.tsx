@@ -14,11 +14,12 @@ import {
 } from "lucide-react";
 import {
   navGroups,
-  badgeCounts,
+  badgeCounts as fallbackBadges,
   filterByRole,
   type NavGroup,
   type NavItem,
   type Role,
+  type BadgeKey,
 } from "./navConfig";
 import { CommandPalette } from "./CommandPalette";
 
@@ -35,6 +36,7 @@ function NavTree({
   groups,
   collapsed,
   pathname,
+  badges,
   openGroups,
   toggleGroup,
   openItems,
@@ -44,6 +46,7 @@ function NavTree({
   groups: NavGroup[];
   collapsed: boolean;
   pathname: string;
+  badges: Record<BadgeKey, number>;
   openGroups: (key: string) => boolean;
   toggleGroup: (key: string) => void;
   openItems: (item: NavItem) => boolean;
@@ -60,7 +63,7 @@ function NavTree({
   const itemRow = (it: NavItem) => {
     const Icon = it.icon;
     const active = isActive(it.href) || hasActiveChild(it);
-    const count = it.badgeKey ? badgeCounts[it.badgeKey] : 0;
+    const count = it.badgeKey ? badges[it.badgeKey] : 0;
 
     // Parent with children
     if (it.children?.length) {
@@ -183,7 +186,13 @@ function NavTree({
   );
 }
 
-export function AdminSidebar({ role = "owner" }: { role?: Role }) {
+export function AdminSidebar({
+  role = "owner",
+  badges = fallbackBadges,
+}: {
+  role?: Role;
+  badges?: Record<BadgeKey, number>;
+}) {
   const pathname = usePathname() ?? "";
   const groups = useMemo(() => filterByRole(navGroups, role), [role]);
 
@@ -253,6 +262,7 @@ export function AdminSidebar({ role = "owner" }: { role?: Role }) {
       groups={groups}
       collapsed={collapsed && !onNavigate /* drawer is always expanded */}
       pathname={pathname}
+      badges={badges}
       openGroups={groupOpen}
       toggleGroup={toggleGroup}
       openItems={itemOpen}
@@ -286,6 +296,20 @@ export function AdminSidebar({ role = "owner" }: { role?: Role }) {
           )}
         </div>
 
+        {/* Expand toggle (collapsed) — kept at the top so it's always visible */}
+        {collapsed && (
+          <div className="px-3 pb-2 shrink-0">
+            <button
+              onClick={() => setCollapsed(false)}
+              title="Expand sidebar"
+              aria-label="Expand sidebar"
+              className="w-full flex items-center justify-center h-10 rounded-xl border border-white/10 bg-white/5 text-slate-300 hover:text-gold hover:bg-white/10 transition-colors"
+            >
+              <PanelLeftOpen className="w-4.5 h-4.5" />
+            </button>
+          </div>
+        )}
+
         {/* Search trigger */}
         <div className={`shrink-0 ${collapsed ? "px-3" : "px-3"}`}>
           <button
@@ -306,19 +330,6 @@ export function AdminSidebar({ role = "owner" }: { role?: Role }) {
         </div>
 
         {tree()}
-
-        {/* Expand button when collapsed */}
-        {collapsed && (
-          <div className="p-3 shrink-0">
-            <button
-              onClick={() => setCollapsed(false)}
-              className="w-full flex items-center justify-center h-10 rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-colors"
-              aria-label="Expand sidebar"
-            >
-              <PanelLeftOpen className="w-4.5 h-4.5" />
-            </button>
-          </div>
-        )}
       </aside>
 
       {/* Mobile hamburger */}

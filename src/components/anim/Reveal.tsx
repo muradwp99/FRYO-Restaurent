@@ -54,7 +54,15 @@ export function Reveal({
       );
     }, el);
 
-    return () => ctx.revert();
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.trigger === el || trigger.vars?.trigger === el) {
+          trigger.kill();
+        }
+      });
+      ctx.revert();
+      ScrollTrigger.refresh();
+    };
   }, [stagger, y, delay, duration, start]);
 
   return (

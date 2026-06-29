@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu as MenuIcon, User, ShoppingBag, X, Sparkles } from "lucide-react";
 import { Logo } from "./Logo";
@@ -10,8 +11,9 @@ import { scrollToId } from "@/components/providers/SmoothScroll";
 import { cn } from "@/lib/utils";
 
 type NavLink = { label: string; href: string; type: "route" | "scroll" };
+type HeaderConfig = { featuredLabel: string; showFeatured: boolean; showAccount: boolean };
 
-const LINKS: NavLink[] = [
+const DEFAULT_LINKS: NavLink[] = [
   { label: "Home", href: "/", type: "route" },
   { label: "Menu", href: "#menu", type: "scroll" },
   { label: "Deals", href: "/deals", type: "route" },
@@ -20,7 +22,18 @@ const LINKS: NavLink[] = [
   { label: "Contact", href: "#contact", type: "scroll" },
 ];
 
-export function Navbar() {
+const DEFAULT_HEADER: HeaderConfig = { featuredLabel: "Featured", showFeatured: true, showAccount: true };
+
+export function Navbar({
+  links = DEFAULT_LINKS,
+  header = DEFAULT_HEADER,
+  offsetTop = 0,
+}: {
+  links?: NavLink[];
+  header?: HeaderConfig;
+  offsetTop?: number;
+}) {
+  const LINKS = links;
   const { openFeatured, openCart, navOpen, toggleNav, closeNav } = useUI();
   const count = useCart(selectCount);
   const pathname = usePathname();
@@ -49,8 +62,9 @@ export function Navbar() {
 
   return (
     <header
+      style={{ top: offsetTop }}
       className={cn(
-        "fixed inset-x-0 top-0 z-50 border-b bg-ink backdrop-blur-xl transition-all duration-500",
+        "fixed inset-x-0 z-50 border-b bg-ink backdrop-blur-xl transition-all duration-500",
         scrolled
           ? "border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
           : "border-white/5"
@@ -79,25 +93,30 @@ export function Navbar() {
         {/* actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* off-canvas featured trigger */}
-          <button
-            onClick={openFeatured}
-            data-cursor="FEATURED"
-            aria-label="Open featured menu"
-            className="flex h-11 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-cream/90 transition-all hover:border-gold/60 hover:text-gold sm:px-4"
-          >
-            <Sparkles className="h-5 w-5" />
-            <span className="hidden font-display text-base tracking-wider sm:inline">
-              Featured
-            </span>
-          </button>
+          {header.showFeatured && (
+            <button
+              onClick={openFeatured}
+              data-cursor="FEATURED"
+              aria-label="Open featured menu"
+              className="flex h-11 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-cream/90 transition-all hover:border-gold/60 hover:text-gold sm:px-4"
+            >
+              <Sparkles className="h-5 w-5" />
+              <span className="hidden font-display text-base tracking-wider sm:inline">
+                {header.featuredLabel}
+              </span>
+            </button>
+          )}
 
-          <button
-            aria-label="Account"
-            data-cursor=""
-            className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/5 text-cream/90 transition-all hover:border-gold/60 hover:text-gold"
-          >
-            <User className="h-5 w-5" />
-          </button>
+          {header.showAccount && (
+            <Link
+              href="/account"
+              aria-label="Account"
+              data-cursor=""
+              className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/5 text-cream/90 transition-all hover:border-gold/60 hover:text-gold"
+            >
+              <User className="h-5 w-5" />
+            </Link>
+          )}
 
           <button
             onClick={openCart}

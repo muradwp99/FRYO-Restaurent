@@ -25,6 +25,65 @@ export async function updateFinanceSettings(data: FinanceSettings): Promise<void
   await writeObject(SETTINGS_FILE, data);
 }
 
+/* ── Payment methods (checkout) ── */
+export type PaymentMethodKey = "card" | "paypal" | "bank" | "cash";
+
+export type PaymentSettings = {
+  card: boolean; // Stripe
+  paypal: boolean;
+  bank: boolean; // manual bank transfer
+  cash: boolean; // pay on collection / cash
+  bankName: string;
+  accountName: string;
+  sortCode: string;
+  accountNumber: string;
+  reference: string;
+};
+
+const PAYMENT_FILE = "payment-settings";
+const PAYMENT_DEFAULT: PaymentSettings = {
+  card: true,
+  paypal: false,
+  bank: true,
+  cash: true,
+  bankName: "Barclays",
+  accountName: "FRYO Ltd",
+  sortCode: "20-00-00",
+  accountNumber: "12345678",
+  reference: "Your order ID",
+};
+
+export async function getPaymentSettings(): Promise<PaymentSettings> {
+  const s = await readObject<Partial<PaymentSettings>>(PAYMENT_FILE, PAYMENT_DEFAULT);
+  return { ...PAYMENT_DEFAULT, ...s };
+}
+
+export async function updatePaymentSettings(data: PaymentSettings): Promise<void> {
+  await writeObject(PAYMENT_FILE, data);
+}
+
+export function stripeConfigured(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY);
+}
+export function paypalConfigured(): boolean {
+  return Boolean(process.env.PAYPAL_CLIENT_ID);
+}
+
+/** Public-safe checkout config (no secrets) for the storefront. */
+export async function getCheckoutPayment() {
+  const s = await getPaymentSettings();
+  return {
+    card: { enabled: s.card, configured: stripeConfigured() },
+    paypal: { enabled: s.paypal, configured: paypalConfigured() },
+    bank: {
+      enabled: s.bank,
+      details: { bankName: s.bankName, accountName: s.accountName, sortCode: s.sortCode, accountNumber: s.accountNumber, reference: s.reference },
+    },
+    cash: { enabled: s.cash },
+  };
+}
+export type CheckoutPayment = Awaited<ReturnType<typeof getCheckoutPayment>>;
+
 /* ── Payouts ── */
 export type PayoutStatus = "Paid" | "Pending";
 export type Payout = { id: string; date: string; amount: string; method: string; status: PayoutStatus };

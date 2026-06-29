@@ -17,9 +17,14 @@ export type PageSeo = {
   description: string;
 };
 
+/** Per-item SEO override, keyed by menu-item id (food) or post slug (blog). */
+export type ItemSeo = { key: string; title: string; description: string };
+
 export type SeoData = {
   global: GlobalSeo;
   pages: PageSeo[];
+  food: ItemSeo[];
+  blog: ItemSeo[];
 };
 
 const FILE = "seo";
@@ -35,8 +40,12 @@ const DEFAULTS: SeoData = {
   },
   pages: [
     { path: "/", label: "Home", title: "FRYO — Burgers, Wraps & Pure Fire", description: "Smash-style burgers and loaded wraps. Classic, Super Charger and BBQ." },
+    { path: "/menu", label: "Menu", title: "Our Menu", description: "Six signature builds, sides and drinks — freshly fried, boldly sauced." },
     { path: "/deals", label: "Deals", title: "The Deals", description: "Stack the savings. Codes apply at checkout — tap to copy." },
+    { path: "/contact", label: "Contact", title: "Get In Touch", description: "Find us, call us, or drop a line — FRYO is open daily." },
   ],
+  food: [],
+  blog: [],
 };
 
 export async function getSeoData(): Promise<SeoData> {
@@ -44,6 +53,8 @@ export async function getSeoData(): Promise<SeoData> {
   return {
     global: { ...DEFAULTS.global, ...stored.global },
     pages: stored.pages ?? DEFAULTS.pages,
+    food: stored.food ?? [],
+    blog: stored.blog ?? [],
   };
 }
 
@@ -68,6 +79,30 @@ export async function updateGlobalSeo(data: GlobalSeo): Promise<void> {
 export async function updatePageSeo(pages: PageSeo[]): Promise<void> {
   const all = await getSeoData();
   all.pages = pages;
+  await writeObject(FILE, all);
+}
+
+/* ── Per-item overrides ── */
+export async function listFoodSeo(): Promise<ItemSeo[]> {
+  return (await getSeoData()).food;
+}
+export async function listBlogSeo(): Promise<ItemSeo[]> {
+  return (await getSeoData()).blog;
+}
+export async function getFoodSeo(id: string): Promise<ItemSeo | null> {
+  return (await getSeoData()).food.find((f) => f.key === id) ?? null;
+}
+export async function getBlogSeo(slug: string): Promise<ItemSeo | null> {
+  return (await getSeoData()).blog.find((b) => b.key === slug) ?? null;
+}
+export async function updateFoodSeo(food: ItemSeo[]): Promise<void> {
+  const all = await getSeoData();
+  all.food = food;
+  await writeObject(FILE, all);
+}
+export async function updateBlogSeo(blog: ItemSeo[]): Promise<void> {
+  const all = await getSeoData();
+  all.blog = blog;
   await writeObject(FILE, all);
 }
 

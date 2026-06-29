@@ -3,6 +3,7 @@ import { Bebas_Neue, Inter } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
 import { getGlobalSeo } from "@/server/seo";
+import { getAppearance } from "@/server/appearance";
 import { getTracking } from "@/server/tracking";
 import { TrackingScripts } from "@/components/TrackingScripts";
 import { CustomCodeInjector } from "@/components/CustomCodeInjector";
@@ -46,14 +47,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const tracking = await getTracking();
+  const [tracking, appearance] = await Promise.all([getTracking(), getAppearance()]);
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${bebas.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full">
-        <Shell>{children}</Shell>
+      <body suppressHydrationWarning className="min-h-full">
+        <Shell nav={appearance.nav} header={appearance.header} announcement={appearance.announcement}>
+          {children}
+        </Shell>
         <TrackingScripts tracking={tracking} />
         <CustomCodeInjector />
       </body>

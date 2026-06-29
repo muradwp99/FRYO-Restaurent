@@ -10,7 +10,7 @@ function revalidateOrders(id?: string) {
   if (id) revalidatePath(`/fryo-kanji/orders/${id}`);
 }
 
-export async function createOrderAction(input: { id: string; customer: string; items: string; amount: string }) {
+export async function createOrderAction(input: { id: string; customer: string; items: string; amount: string; payment?: string }) {
   await createOrder(input);
   revalidateOrders(input.id);
   return { ok: true as const };

@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, PenTool, ArrowUpRight } from "lucide-react";
 import { getPostBySlug } from "@/server/blog";
 import { getSocials } from "@/server/appearance";
 import { getContactContent } from "@/server/content";
+import { getBlogSeo } from "@/server/seo";
 import { TextReveal } from "@/components/anim/TextReveal";
 import { Reveal } from "@/components/anim/Reveal";
 import { Footer } from "@/components/sections/Footer";
@@ -13,8 +14,9 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
-  return { title: post ? post.title : "Journal", description: post?.excerpt };
+  const [post, seo] = await Promise.all([getPostBySlug(slug), getBlogSeo(slug)]);
+  if (!post) return { title: "Journal" };
+  return { title: seo?.title || post.title, description: seo?.description || post.excerpt };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {

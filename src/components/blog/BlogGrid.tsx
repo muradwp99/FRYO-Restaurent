@@ -48,7 +48,15 @@ export function BlogGrid({ posts }: { posts: BlogPost[] }) {
         scrollTrigger: { trigger: el, start: "top 80%", once: true },
       });
     }, el);
-    return () => ctx.revert();
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.trigger === el || trigger.vars?.trigger === el) {
+          trigger.kill();
+        }
+      });
+      ctx.revert();
+      ScrollTrigger.refresh();
+    };
   }, []);
 
   if (posts.length === 0) {
@@ -77,7 +85,7 @@ export function BlogGrid({ posts }: { posts: BlogPost[] }) {
           </div>
 
           <div className="flex flex-1 flex-col p-6">
-            <h2 className="font-body text-xl font-bold leading-snug tracking-tight text-cream transition-colors group-hover:text-gold">
+            <h2 className="font-body text-xl font-semibold leading-snug tracking-tight text-cream transition-colors group-hover:text-gold">
               {p.title}
             </h2>
             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-cream/55">{p.excerpt}</p>

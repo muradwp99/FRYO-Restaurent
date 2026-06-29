@@ -2,10 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Star, Quote } from "lucide-react";
 import { TextReveal } from "@/components/anim/TextReveal";
 
+if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
+
 type Review = { name: string; text: string; stars: number };
+type Header = { eyebrow: string; title: string };
+const HEADER_FALLBACK: Header = { eyebrow: "Word On The Street", title: "Loved By The Hungry" };
 
 const FALLBACK_REVIEWS: Review[] = [
   { name: "Maya R.", text: "The Super Charger is dangerously good. That Algerian sauce should be illegal.", stars: 5 },
@@ -16,7 +21,7 @@ const FALLBACK_REVIEWS: Review[] = [
   { name: "Danny O.", text: "Classic burger for £3.99 that tastes like a tenner. Mad value.", stars: 5 },
 ];
 
-export function Testimonials({ reviews }: { reviews?: Review[] }) {
+export function Testimonials({ reviews, header = HEADER_FALLBACK }: { reviews?: Review[]; header?: Header }) {
   const REVIEWS = reviews && reviews.length > 0 ? reviews : FALLBACK_REVIEWS;
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -26,6 +31,7 @@ export function Testimonials({ reviews }: { reviews?: Review[] }) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
 
+    let io: IntersectionObserver | null = null;
     const ctx = gsap.context(() => {
       const half = track.scrollWidth / 2;
       const tween = gsap.to(track, {
@@ -39,13 +45,29 @@ export function Testimonials({ reviews }: { reviews?: Review[] }) {
       const leave = () => gsap.to(tween, { timeScale: 1, duration: 0.6 });
       track.addEventListener("pointerenter", enter);
       track.addEventListener("pointerleave", leave);
+
+      // Pause the marquee while it's off-screen so it never burns frame budget
+      // during hero/other-section scrolling (a key source of homepage jank).
+      io = new IntersectionObserver(
+        ([entry]) => (entry.isIntersecting ? tween.play() : tween.pause()),
+        { rootMargin: "200px" },
+      );
+      io.observe(track);
+
       return () => {
         track.removeEventListener("pointerenter", enter);
         track.removeEventListener("pointerleave", leave);
       };
     }, track);
 
-    return () => ctx.revert();
+    return () => {
+      io?.disconnect();
+      ctx.revert();
+      if (typeof gsap.killTweensOf === "function") {
+        gsap.killTweensOf(track);
+      }
+      ScrollTrigger.refresh();
+    };
   }, []);
 
   const cards = [...REVIEWS, ...REVIEWS];
@@ -54,14 +76,14 @@ export function Testimonials({ reviews }: { reviews?: Review[] }) {
     <section className="relative overflow-hidden py-24 md:py-32">
       <div className="mx-auto mb-14 max-w-[1400px] px-5 text-center md:px-10">
         <span className="font-display text-base tracking-[0.4em] text-gold">
-          Word On The Street
+          {header.eyebrow}
         </span>
         <TextReveal
           as="h2"
           by="words"
           className="mt-2 font-display text-5xl leading-none text-cream md:text-7xl"
         >
-          Loved By The Hungry
+          {header.title}
         </TextReveal>
       </div>
 

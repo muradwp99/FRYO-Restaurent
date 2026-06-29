@@ -39,7 +39,13 @@ export default function OrderConfirmedPage() {
         ease: "power3.out",
       });
     });
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      if (typeof gsap.killTweensOf === "function") {
+        gsap.killTweensOf(barRef.current);
+      }
+      ScrollTrigger.refresh();
+    };
   }, [mounted]);
 
   if (!mounted) {

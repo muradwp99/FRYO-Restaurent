@@ -96,7 +96,9 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
   const sizeCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // cap DPR at 1.5 — the burger frame redraws on every scrub step, so fill
+    // cost scales with pixel count; 1.5 stays crisp while easing hero-scroll jank.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.round(canvas.clientWidth * dpr);
     canvas.height = Math.round(canvas.clientHeight * dpr);
   };
@@ -266,7 +268,14 @@ export function Hero({ scenes, stats }: { scenes?: Scene[]; stats?: Stat[] }) {
 
     return () => {
       window.removeEventListener("resize", onResize);
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.trigger === section || trigger.vars?.trigger === section) {
+          trigger.kill();
+        }
+      });
+      splits.forEach((split) => split.revert());
       ctx.revert();
+      ScrollTrigger.refresh();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);

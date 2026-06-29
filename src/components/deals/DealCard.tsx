@@ -32,7 +32,7 @@ export function DealCard({ deal }: { deal: Deal }) {
         </span>
         <span className="font-display text-sm tracking-widest text-gold">{deal.badge}</span>
       </div>
-      <h3 className="mt-2 text-2xl font-bold tracking-tight text-cream">{deal.title}</h3>
+      <h3 className="mt-2 text-2xl font-semibold tracking-tight text-cream">{deal.title}</h3>
       <p className="text-sm leading-relaxed text-cream/60">{deal.blurb}</p>
       <div className="mt-auto flex items-center justify-between gap-3 pt-3">
         <button

@@ -10,8 +10,18 @@ import { Footer } from "@/components/sections/Footer";
 import { getPublicMenu, getFeaturedMenu } from "@/server/menu";
 import { getPublicDeals } from "@/server/deals";
 import { getHomeTestimonials } from "@/server/reviews";
-import { getContactContent, getAboutContent, getHeroContent, getStepsContent } from "@/server/content";
-import { getSocials } from "@/server/appearance";
+import {
+  getContactContent,
+  getAboutContent,
+  getHeroContent,
+  getStepsContent,
+  getLineupContent,
+  getMenuSectionContent,
+  getDealsBlockContent,
+  getTestimonialsContent,
+  getNewsletterContent,
+} from "@/server/content";
+import { getSocials, getNav, getFooterConfig, getTheme } from "@/server/appearance";
 import { getPageMetadata } from "@/server/seo";
 import { SchemaScript } from "@/components/SchemaScript";
 
@@ -23,7 +33,25 @@ export function generateMetadata() {
 }
 
 export default async function Home() {
-  const [menu, featured, deals, testimonials, contact, about, hero, steps, socials] = await Promise.all([
+  const [
+    menu,
+    featured,
+    deals,
+    autoReviews,
+    contact,
+    about,
+    hero,
+    steps,
+    socials,
+    lineup,
+    menuSection,
+    dealsBlock,
+    testimonialsContent,
+    newsletter,
+    nav,
+    footerConfig,
+    theme,
+  ] = await Promise.all([
     getPublicMenu(),
     getFeaturedMenu(),
     getPublicDeals(),
@@ -33,19 +61,39 @@ export default async function Home() {
     getHeroContent(),
     getStepsContent(),
     getSocials(),
+    getLineupContent(),
+    getMenuSectionContent(),
+    getDealsBlockContent(),
+    getTestimonialsContent(),
+    getNewsletterContent(),
+    getNav(),
+    getFooterConfig(),
+    getTheme(),
   ]);
+
+  const testimonials = testimonialsContent.autoPull
+    ? autoReviews
+    : testimonialsContent.manual.map((m) => ({ name: m.author, text: m.quote, stars: m.rating }));
+
   return (
     <>
       <SchemaScript />
       <Hero scenes={hero.scenes} stats={hero.stats} />
-      <Lineup items={featured} />
-      <Menu items={menu} />
+      <Lineup items={featured} content={lineup} />
+      <Menu items={menu} content={menuSection} />
       <Steps content={steps} />
-      <DealsStrip deals={deals} />
-      <Testimonials reviews={testimonials} />
+      <DealsStrip deals={deals} content={dealsBlock} />
+      <Testimonials reviews={testimonials} header={{ eyebrow: testimonialsContent.eyebrow, title: testimonialsContent.title }} />
       <About content={about} />
       <Contact content={contact} socials={socials} />
-      <Footer socials={socials} contact={contact} />
+      <Footer
+        socials={socials}
+        contact={contact}
+        newsletter={newsletter}
+        navLinks={nav.links}
+        footerConfig={footerConfig}
+        theme={theme}
+      />
     </>
   );
 }

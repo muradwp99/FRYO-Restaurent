@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Check, Search } from "lucide-react";
 import type { GlobalSeo } from "@/server/seo";
 import { saveGlobalSeoAction } from "@/server/actions/seo";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const inputCls =
   "w-full px-3 py-2.5 text-sm bg-royal/20 border border-white/10 rounded-lg outline-none focus:border-gold/40 focus:ring-2 focus:ring-gold/10 transition-all text-slate-100 placeholder:text-slate-600 tracking-wide";
@@ -62,10 +63,7 @@ export function GlobalSeoEditor({ initial }: { initial: GlobalSeo }) {
           <textarea rows={3} className={inputCls} value={form.defaultDescription} onChange={(e) => set("defaultDescription", e.target.value)} />
           <div className="mt-1"><Counter len={form.defaultDescription.length} min={140} max={160} /></div>
         </div>
-        <div>
-          <label className={labelCls}>Default OG image</label>
-          <input className={inputCls} value={form.ogImage} onChange={(e) => set("ogImage", e.target.value)} placeholder="/og.webp" />
-        </div>
+        <ImageUpload value={form.ogImage} onChange={(url) => set("ogImage", url)} label="Default OG image (1200×630)" />
       </div>
 
       <button type="submit" disabled={pending} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold hover:bg-gold-light text-navy text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-gold/20 tracking-wide disabled:opacity-60">

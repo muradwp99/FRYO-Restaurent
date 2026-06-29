@@ -3,13 +3,22 @@
 import { revalidatePath } from "next/cache";
 import {
   updateFinanceSettings,
+  updatePaymentSettings,
   setPayoutStatus,
   setRefundStatus,
   deleteRefund,
   type FinanceSettings,
+  type PaymentSettings,
   type PayoutStatus,
   type RefundStatus,
 } from "@/server/finance";
+
+export async function savePaymentSettingsAction(data: PaymentSettings) {
+  await updatePaymentSettings(data);
+  revalidatePath("/fryo-kanji/finance/payments");
+  revalidatePath("/checkout");
+  return { ok: true as const };
+}
 
 export async function saveFinanceSettingsAction(data: FinanceSettings) {
   await updateFinanceSettings(data);

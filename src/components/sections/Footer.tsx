@@ -5,20 +5,46 @@ import Link from "next/link";
 import { ArrowUpRight, Send, MapPin, Clock, Phone, Check } from "lucide-react";
 import { Reveal } from "@/components/anim/Reveal";
 import { SocialLinks } from "@/components/ui/SocialLinks";
-import type { SocialLink } from "@/server/appearance";
-import type { ContactContent } from "@/server/content";
+import type { SocialLink, NavLinkItem, FooterConfig, ThemeConfig } from "@/server/appearance";
+import type { ContactContent, NewsletterContent } from "@/server/content";
 
-const EXPLORE = [
-  { label: "Menu", href: "/#menu" },
-  { label: "Deals", href: "/deals" },
-  { label: "About", href: "/about" },
-  { label: "Blog", href: "/blog" },
-  { label: "Your Bag", href: "/cart" },
+const EXPLORE_FALLBACK: NavLinkItem[] = [
+  { label: "Menu", href: "#menu", type: "scroll" },
+  { label: "Deals", href: "/deals", type: "route" },
+  { label: "About", href: "/about", type: "route" },
+  { label: "Blog", href: "/blog", type: "route" },
 ];
 
-export function Footer({ socials = [], contact }: { socials?: SocialLink[]; contact?: ContactContent }) {
+const NEWSLETTER_FALLBACK: NewsletterContent = {
+  heading: "Get The Drop",
+  blurb: "New builds, secret deals and free-food giveaways. No spam, just sauce.",
+  placeholder: "you@example.com",
+};
+
+const FOOTER_FALLBACK: FooterConfig = { tagline: "Fresh · Fried · Fearless", exploreHeading: "Explore", visitHeading: "Visit" };
+const THEME_FALLBACK: ThemeConfig = { brandName: "FRYO", footerWordmark: "FRYO" };
+
+/** scroll links (#id) point at the homepage anchor from anywhere in the footer. */
+const footerHref = (l: NavLinkItem) => (l.type === "scroll" ? `/${l.href}` : l.href);
+
+export function Footer({
+  socials = [],
+  contact,
+  newsletter = NEWSLETTER_FALLBACK,
+  navLinks = EXPLORE_FALLBACK,
+  footerConfig = FOOTER_FALLBACK,
+  theme = THEME_FALLBACK,
+}: {
+  socials?: SocialLink[];
+  contact?: ContactContent;
+  newsletter?: NewsletterContent;
+  navLinks?: NavLinkItem[];
+  footerConfig?: FooterConfig;
+  theme?: ThemeConfig;
+}) {
   const [subscribed, setSubscribed] = useState(false);
   const [email, setEmail] = useState("");
+  const explore = navLinks.filter((l) => l.href !== "/");
   const address = contact ? `${contact.addressLine1}, ${contact.addressLine2}` : "42 Flame Street, Manchester M1 4FR";
   const phone = contact?.phone ?? "+44 161 555 0142";
   const hours = contact ? `${contact.hoursDays} · ${contact.hoursTime}` : "Daily · 11:00 – 23:00";
@@ -49,12 +75,12 @@ export function Footer({ socials = [], contact }: { socials?: SocialLink[]; cont
         {/* columns */}
         <div className="grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1.3fr]">
           <div>
-            <h3 className="font-display text-2xl tracking-widest text-gold">Explore</h3>
+            <h3 className="font-display text-2xl tracking-widest text-gold">{footerConfig.exploreHeading}</h3>
             <ul className="mt-5 space-y-3">
-              {EXPLORE.map((l) => (
+              {explore.map((l) => (
                 <li key={l.label}>
                   <Link
-                    href={l.href}
+                    href={footerHref(l)}
                     className="group inline-flex items-center gap-1 text-sm text-cream/60 transition-colors hover:text-gold"
                   >
                     {l.label}
@@ -66,7 +92,7 @@ export function Footer({ socials = [], contact }: { socials?: SocialLink[]; cont
           </div>
 
           <div>
-            <h3 className="font-display text-2xl tracking-widest text-gold">Visit</h3>
+            <h3 className="font-display text-2xl tracking-widest text-gold">{footerConfig.visitHeading}</h3>
             <ul className="mt-5 space-y-3 text-sm text-cream/60">
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
@@ -83,10 +109,10 @@ export function Footer({ socials = [], contact }: { socials?: SocialLink[]; cont
 
           <div>
             <h3 className="font-display text-2xl tracking-widest text-gold">
-              Get The Drop
+              {newsletter.heading}
             </h3>
             <p className="mt-5 text-sm text-cream/60">
-              New builds, secret deals and free-food giveaways. No spam, just sauce.
+              {newsletter.blurb}
             </p>
             <form
               onSubmit={(e) => {
@@ -102,7 +128,7 @@ export function Footer({ socials = [], contact }: { socials?: SocialLink[]; cont
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={subscribed}
-                placeholder={subscribed ? "You're subscribed!" : "you@example.com"}
+                placeholder={subscribed ? "You're subscribed!" : newsletter.placeholder}
                 className="min-w-0 flex-1 bg-transparent text-sm text-cream placeholder:text-cream/35 focus:outline-none disabled:opacity-60"
               />
               <button
@@ -120,15 +146,15 @@ export function Footer({ socials = [], contact }: { socials?: SocialLink[]; cont
 
         {/* bottom bar */}
         <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-xs uppercase tracking-widest text-cream/40 sm:flex-row">
-          <p>© {new Date().getFullYear()} FRYO. All rights reserved.</p>
-          <p>Fresh · Fried · Fearless</p>
+          <p>© {new Date().getFullYear()} {theme.brandName}. All rights reserved.</p>
+          <p>{footerConfig.tagline}</p>
         </div>
       </div>
 
       {/* immersive giant wordmark */}
       <div className="pointer-events-none select-none overflow-hidden">
         <div className="-mb-[2.5vw] text-center font-display text-[24vw] leading-[0.8] text-transparent [-webkit-text-stroke:1px_rgba(245,196,0,0.18)]">
-          FRYO
+          {theme.footerWordmark}
         </div>
       </div>
     </footer>

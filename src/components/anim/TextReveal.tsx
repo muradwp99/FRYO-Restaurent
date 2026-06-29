@@ -46,7 +46,13 @@ export function TextReveal({ children, className, as = "h2", by = "chars" }: Pro
     }, el);
 
     return () => {
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.trigger === el || trigger.vars?.trigger === el) {
+          trigger.kill();
+        }
+      });
       ctx.revert();
+      ScrollTrigger.refresh();
     };
   }, [children, by]);
 

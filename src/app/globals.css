@@ -49,11 +49,38 @@ h1, h2, h3, h4, h5, .font-display {
   line-height: 0.92;
 }
 
-/* ----- custom cursor: hide native cursor on fine pointers ----- */
-@media (pointer: fine) {
-  * {
-    cursor: none !important;
-  }
+/* ----- ambient interactive glow (InteractiveGlow) ----- */
+.glow-blob {
+  position: absolute;
+  width: 38rem;
+  height: 38rem;
+  border-radius: 9999px;
+  filter: blur(120px);
+  opacity: 0.18;
+  will-change: transform;
+}
+.glow-blob-a {
+  top: -10%;
+  left: -8%;
+  background: radial-gradient(circle, rgba(245, 196, 0, 0.55), transparent 70%);
+  animation: glow-drift-a 22s ease-in-out infinite;
+}
+.glow-blob-b {
+  bottom: -12%;
+  right: -6%;
+  background: radial-gradient(circle, rgba(16, 42, 113, 0.7), transparent 70%);
+  animation: glow-drift-b 26s ease-in-out infinite;
+}
+@keyframes glow-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(6rem, 4rem, 0) scale(1.12); }
+}
+@keyframes glow-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-5rem, -3rem, 0) scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-blob { animation: none; }
 }
 
 /* ----- scrollbar ----- */
@@ -184,8 +211,16 @@ h1, h2, h3, h4, h5, .font-display {
   }
 }
 
-/* Admin dashboard — restore normal cursor and override dark-site body */
+/* Admin dashboard + auth — restore normal cursor (no custom cursor renders here) */
 .admin-layout,
-.admin-layout * {
+.admin-layout *,
+.auth-page,
+.auth-page * {
   cursor: auto !important;
+}
+
+.auth-page a,
+.auth-page button,
+.auth-page [role="button"] {
+  cursor: pointer !important;
 }

@@ -33,11 +33,31 @@ export type HeroContent = { scenes: HeroScene[]; stats: HeroStat[] };
 export type Step = { title: string; body: string };
 export type StepsContent = { eyebrow: string; title: string; steps: Step[] };
 
+/* ── Homepage section copy (data — menu items, deals, reviews — stays in its own stores) ── */
+export type LineupContent = { eyebrow: string; title: string; titleAccent: string; ctaLabel: string };
+export type MenuSectionContent = { eyebrow: string; title: string; titleAccent: string };
+export type DealsBlockContent = { eyebrow: string; title: string; titleAccent: string; ctaLabel: string };
+
+export type ManualTestimonial = { quote: string; author: string; rating: number };
+export type TestimonialsContent = {
+  eyebrow: string;
+  title: string;
+  /** Pull Approved + "show on home" reviews automatically. When false, use {@link manual}. */
+  autoPull: boolean;
+  manual: ManualTestimonial[];
+};
+export type NewsletterContent = { heading: string; blurb: string; placeholder: string };
+
 export type ContentBlocks = {
   contact: ContactContent;
   about: AboutContent;
   hero: HeroContent;
   steps: StepsContent;
+  lineup: LineupContent;
+  menuSection: MenuSectionContent;
+  dealsBlock: DealsBlockContent;
+  testimonials: TestimonialsContent;
+  newsletter: NewsletterContent;
 };
 
 export const CONTENT_DEFAULTS: ContentBlocks = {
@@ -91,6 +111,38 @@ export const CONTENT_DEFAULTS: ContentBlocks = {
       { title: "Fired & Delivered", body: "We fry it fresh and track it to your door in real time." },
     ],
   },
+  lineup: {
+    eyebrow: "The Lineup",
+    title: "Six Builds.",
+    titleAccent: "One Obsession.",
+    ctaLabel: "Customize",
+  },
+  menuSection: {
+    eyebrow: "The Goods",
+    title: "Our",
+    titleAccent: "Menu",
+  },
+  dealsBlock: {
+    eyebrow: "Save More",
+    title: "Today's",
+    titleAccent: "Deals",
+    ctaLabel: "View All Deals",
+  },
+  testimonials: {
+    eyebrow: "Word On The Street",
+    title: "Loved By The Hungry",
+    autoPull: true,
+    manual: [
+      { quote: "The Super Charger is dangerously good. That Algerian sauce should be illegal.", author: "Maya R.", rating: 5 },
+      { quote: "Customised my BBQ burger exactly how I like it. Showed up hot and perfect.", author: "Tariq B.", rating: 5 },
+      { quote: "Fastest delivery in the city and the wraps actually hold together. Obsessed.", author: "Jess W.", rating: 5 },
+    ],
+  },
+  newsletter: {
+    heading: "Get The Drop",
+    blurb: "New builds, secret deals and free-food giveaways. No spam, just sauce.",
+    placeholder: "you@example.com",
+  },
 };
 
 const FILE = "content";
@@ -103,6 +155,11 @@ export async function getAllContent(): Promise<ContentBlocks> {
     about: { ...CONTENT_DEFAULTS.about, ...stored.about },
     hero: { ...CONTENT_DEFAULTS.hero, ...stored.hero },
     steps: { ...CONTENT_DEFAULTS.steps, ...stored.steps },
+    lineup: { ...CONTENT_DEFAULTS.lineup, ...stored.lineup },
+    menuSection: { ...CONTENT_DEFAULTS.menuSection, ...stored.menuSection },
+    dealsBlock: { ...CONTENT_DEFAULTS.dealsBlock, ...stored.dealsBlock },
+    testimonials: { ...CONTENT_DEFAULTS.testimonials, ...stored.testimonials },
+    newsletter: { ...CONTENT_DEFAULTS.newsletter, ...stored.newsletter },
   };
 }
 
@@ -120,6 +177,26 @@ export async function getHeroContent(): Promise<HeroContent> {
 
 export async function getStepsContent(): Promise<StepsContent> {
   return (await getAllContent()).steps;
+}
+
+export async function getLineupContent(): Promise<LineupContent> {
+  return (await getAllContent()).lineup;
+}
+
+export async function getMenuSectionContent(): Promise<MenuSectionContent> {
+  return (await getAllContent()).menuSection;
+}
+
+export async function getDealsBlockContent(): Promise<DealsBlockContent> {
+  return (await getAllContent()).dealsBlock;
+}
+
+export async function getTestimonialsContent(): Promise<TestimonialsContent> {
+  return (await getAllContent()).testimonials;
+}
+
+export async function getNewsletterContent(): Promise<NewsletterContent> {
+  return (await getAllContent()).newsletter;
 }
 
 export async function updateContent<K extends keyof ContentBlocks>(key: K, data: ContentBlocks[K]): Promise<void> {

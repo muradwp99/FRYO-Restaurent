@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { MENU, type MenuItem } from "@/lib/menu";
+import type { MenuSectionContent } from "@/server/content";
 import { AddToCartButton } from "@/components/ui/AddToCartButton";
 import { formatGBP, cn } from "@/lib/utils";
 
@@ -16,7 +17,9 @@ const badgeStyles: Record<string, string> = {
   Signature: "bg-gold text-navy",
 };
 
-export function Menu({ items: source = MENU }: { items?: MenuItem[] }) {
+const MENU_SECTION_FALLBACK: MenuSectionContent = { eyebrow: "The Goods", title: "Our", titleAccent: "Menu" };
+
+export function Menu({ items: source = MENU, content = MENU_SECTION_FALLBACK }: { items?: MenuItem[]; content?: MenuSectionContent }) {
   const [filter, setFilter] = useState<string>("All");
   const FILTERS = ["All", ...Array.from(new Set(source.map((m) => m.category)))];
   const items = source.filter((m) => filter === "All" || m.category === filter);
@@ -28,10 +31,10 @@ export function Menu({ items: source = MENU }: { items?: MenuItem[] }) {
         <div className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div>
             <span className="font-display text-lg tracking-[0.4em] text-gold">
-              The Goods
+              {content.eyebrow}
             </span>
             <h2 className="mt-2 font-display text-6xl leading-none text-cream md:text-8xl">
-              Our <span className="text-gold-grad">Menu</span>
+              {content.title} <span className="text-gold-grad">{content.titleAccent}</span>
             </h2>
           </div>
           {/* filter tabs */}
@@ -86,7 +89,7 @@ export function Menu({ items: source = MENU }: { items?: MenuItem[] }) {
                     {item.badge}
                   </span>
                 )}
-                <span className="absolute right-4 top-4 rounded-full bg-navy/80 px-3 py-1 font-body text-lg font-bold leading-none text-gold backdrop-blur">
+                <span className="absolute right-4 top-4 rounded-full bg-navy/80 px-3 py-1 font-body text-lg font-semibold leading-none text-gold backdrop-blur">
                   {formatGBP(item.price)}
                 </span>
               </div>
@@ -94,7 +97,7 @@ export function Menu({ items: source = MENU }: { items?: MenuItem[] }) {
               <div className="flex flex-1 flex-col p-6">
                 <Link
                   href={`/food/${item.id}`}
-                  className="font-body text-xl font-bold tracking-tight text-cream transition-colors hover:text-gold"
+                  className="font-body text-xl font-semibold tracking-tight text-cream transition-colors hover:text-gold"
                 >
                   {item.name}
                 </Link>

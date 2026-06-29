@@ -7,11 +7,19 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Star, ArrowUpRight, Flame } from "lucide-react";
 import { MENU, type MenuItem } from "@/lib/menu";
+import type { LineupContent } from "@/server/content";
 import { formatGBP } from "@/lib/utils";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
-export function Lineup({ items = MENU }: { items?: MenuItem[] }) {
+const LINEUP_FALLBACK: LineupContent = {
+  eyebrow: "The Lineup",
+  title: "Six Builds.",
+  titleAccent: "One Obsession.",
+  ctaLabel: "Customize",
+};
+
+export function Lineup({ items = MENU, content = LINEUP_FALLBACK }: { items?: MenuItem[]; content?: LineupContent }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -20,62 +28,63 @@ export function Lineup({ items = MENU }: { items?: MenuItem[] }) {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    const mm = gsap.matchMedia();
+    // Horizontal scroll via CSS `sticky` + a scrubbed transform — NOT ScrollTrigger
+    // `pin`. Pinning wraps the section in a pin-spacer that GSAP reparents outside
+    // React, which throws "removeChild … not a child" when navigating away. The
+    // sticky approach keeps every node React-owned, so unmount is always safe.
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
 
-    // desktop: pin the section and scroll the track horizontally
-    mm.add("(min-width: 768px)", () => {
-      const distance = () => track.scrollWidth - window.innerWidth + 96;
-      const tween = gsap.to(track, {
-        x: () => -distance(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${distance()}`,
-          scrub: 0.8,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
+      mm.add("(min-width: 768px)", () => {
+        const distance = () => Math.max(track.scrollWidth - window.innerWidth + 96, 0);
+        // tall section gives the vertical scroll room the sticky inner needs
+        const setHeight = () => gsap.set(section, { height: window.innerHeight + distance() });
+        setHeight();
+
+        gsap.to(track, {
+          x: () => -distance(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: () => "+=" + distance(),
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+            onRefresh: setHeight,
+          },
+        });
+
+        gsap.utils.toArray<HTMLElement>(".lineup-img").forEach((img) => {
+          gsap.fromTo(
+            img,
+            { scale: 1.15 },
+            {
+              scale: 1,
+              ease: "none",
+              scrollTrigger: { trigger: section, start: "top top", end: () => "+=" + distance(), scrub: true },
+            }
+          );
+        });
+
+        return () => gsap.set(section, { clearProps: "height" });
       });
+    }, section);
 
-      // subtle parallax on each card image
-      gsap.utils.toArray<HTMLElement>(".lineup-img").forEach((img) => {
-        gsap.fromTo(
-          img,
-          { scale: 1.15 },
-          {
-            scale: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: section,
-              start: "top top",
-              end: () => `+=${distance()}`,
-              scrub: true,
-            },
-          }
-        );
-      });
-
-      return () => tween.kill();
-    });
-
-    return () => mm.revert();
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative overflow-hidden bg-ink py-20 md:py-0"
-    >
-      <div className="md:flex md:h-screen md:flex-col md:justify-center">
+    <section ref={sectionRef} className="relative bg-ink py-20 md:py-0">
+      {/* sticky viewport — NOTE: no `overflow-hidden` on the section (an ancestor
+          with overflow clip would break position: sticky). Clip on the inner. */}
+      <div className="md:sticky md:top-0 md:flex md:h-screen md:flex-col md:justify-center md:overflow-hidden">
         {/* heading */}
         <div className="mx-auto mb-10 max-w-[1400px] px-5 md:mb-8 md:px-10">
           <span className="font-display text-base tracking-[0.4em] text-gold">
-            The Lineup
+            {content.eyebrow}
           </span>
           <h2 className="mt-2 font-display text-5xl leading-none text-cream md:text-7xl">
-            Six Builds. <span className="text-gold-grad">One Obsession.</span>
+            {content.title} <span className="text-gold-grad">{content.titleAccent}</span>
           </h2>
         </div>
 
@@ -114,7 +123,7 @@ export function Lineup({ items = MENU }: { items?: MenuItem[] }) {
                   <Star className="h-3.5 w-3.5 fill-gold" /> {item.rating}
                   <span className="text-cream/40">· {item.calories} kcal</span>
                 </div>
-                <h3 className="mt-2 text-2xl font-bold tracking-tight text-cream">
+                <h3 className="mt-2 text-2xl font-semibold tracking-tight text-cream">
                   {item.name}
                 </h3>
                 <p className="mt-1 line-clamp-2 text-sm text-cream/55">
@@ -129,7 +138,7 @@ export function Lineup({ items = MENU }: { items?: MenuItem[] }) {
                     data-cursor="CUSTOMIZE"
                     className="inline-flex items-center gap-1 rounded-full border border-gold/60 px-4 py-2 font-display text-base tracking-widest text-gold transition-all hover:bg-gold hover:text-navy"
                   >
-                    Customize <ArrowUpRight className="h-4 w-4" />
+                    {content.ctaLabel} <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>

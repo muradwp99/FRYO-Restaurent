@@ -8,6 +8,7 @@ import Link from "next/link";
 import { formatGBP } from "@/lib/utils";
 import type { AdminMenuItem, MenuItemInput, MenuStatus } from "@/server/menu";
 import { saveMenuItemAction, deleteMenuItemAction, setMenuStatusAction } from "@/server/actions/menu";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const IMAGE_OPTIONS = [
   "/products/assembled.webp",
@@ -309,14 +310,17 @@ function MenuItemModal({
           </div>
 
           <div className="sm:col-span-2">
-            <label className={labelCls}>Image</label>
-            <select className={inputCls} value={form.image} onChange={(e) => set("image", e.target.value)}>
+            <ImageUpload value={form.image} onChange={(url) => set("image", url)} label="Image" />
+            <select
+              className={`${inputCls} mt-2`}
+              value={IMAGE_OPTIONS.includes(form.image) ? form.image : ""}
+              onChange={(e) => e.target.value && set("image", e.target.value)}
+            >
+              <option value="" className="bg-navy">…or pick a preset image</option>
               {IMAGE_OPTIONS.map((img) => (
                 <option key={img} value={img} className="bg-navy">{img}</option>
               ))}
-              {!IMAGE_OPTIONS.includes(form.image) && <option value={form.image} className="bg-navy">{form.image}</option>}
             </select>
-            <input className={`${inputCls} mt-2`} value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="/products/your-image.webp" />
           </div>
 
           <div>

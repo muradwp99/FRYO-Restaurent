@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2, Loader2, Copy, Check, X } from "lucide-react";
 import type { MediaItem } from "@/server/media";
 import { addMediaAction, deleteMediaAction } from "@/server/actions/system";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 const inputCls =
   "w-full px-3 py-2.5 text-sm bg-royal/20 border border-white/10 rounded-lg outline-none focus:border-gold/40 focus:ring-2 focus:ring-gold/10 transition-all text-slate-100 placeholder:text-slate-600 tracking-wide";
@@ -89,10 +90,7 @@ export function MediaManager({ items }: { items: MediaItem[] }) {
                 <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">Name</label>
                 <input className={inputCls} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="hero-shot.webp" />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">URL / path</label>
-                <input className={`${inputCls} font-mono`} value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} placeholder="/products/new.webp" required />
-              </div>
+              <ImageUpload value={form.url} onChange={(url) => setForm((f) => ({ ...f, url, name: f.name || url.split("/").pop() || "image" }))} label="Image (drag & drop or browse)" />
             </div>
             <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-white/8">
               <button type="button" onClick={() => setAdding(false)} className="px-4 py-2 text-sm text-slate-300 hover:text-white tracking-wide">Cancel</button>

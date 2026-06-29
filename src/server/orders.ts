@@ -11,6 +11,8 @@ export type AdminOrder = {
   status: OrderStatus;
   time: string;
   date: string;
+  /** How the customer chose to pay (Card / PayPal / Bank transfer / Cash). */
+  payment?: string;
 };
 
 export const ORDER_STATUSES: OrderStatus[] = ["Pending", "Preparing", "Ready", "Delivered", "Cancelled"];
@@ -35,7 +37,7 @@ export async function listOrders(): Promise<AdminOrder[]> {
 }
 
 /** Persist a freshly-placed customer order (from checkout) into the admin pipeline. */
-export async function createOrder(input: { id: string; customer: string; items: string; amount: string }): Promise<AdminOrder> {
+export async function createOrder(input: { id: string; customer: string; items: string; amount: string; payment?: string }): Promise<AdminOrder> {
   const rows = await listOrders();
   const date = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const order: AdminOrder = { ...input, status: "Pending", time: "just now", date };

@@ -19,8 +19,6 @@ export function HeroEditor({ initial }: { initial: HeroContent }) {
 
   const setScene = (i: number, key: "heading" | "sub" | "body", v: string) =>
     setForm((f) => ({ ...f, scenes: f.scenes.map((s, idx) => (idx === i ? { ...s, [key]: v } : s)) }));
-  const setStat = (i: number, key: "target" | "suffix" | "label", v: string | number) =>
-    setForm((f) => ({ ...f, stats: f.stats.map((s, idx) => (idx === i ? { ...s, [key]: v } : s)) }));
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,17 +61,14 @@ export function HeroEditor({ initial }: { initial: HeroContent }) {
         ))}
       </div>
 
-      <div className="bg-ink-2 rounded-xl border border-white/8 shadow-[0_1px_4px_rgba(0,0,0,0.5)] p-5">
-        <label className={labelCls}>Stat counters</label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-1">
-          {form.stats.map((s, i) => (
-            <div key={i} className="flex gap-2">
-              <input type="number" min="0" className={`${inputCls} w-20`} value={s.target} onChange={(e) => setStat(i, "target", Number(e.target.value))} />
-              <input className={`${inputCls} w-16`} value={s.suffix} onChange={(e) => setStat(i, "suffix", e.target.value)} placeholder="K+" />
-              <input className={inputCls} value={s.label} onChange={(e) => setStat(i, "label", e.target.value)} placeholder="Orders Served" />
-            </div>
-          ))}
+      <div className="bg-ink-2 rounded-xl border border-white/8 shadow-[0_1px_4px_rgba(0,0,0,0.5)] p-5 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-slate-200 tracking-wide">Stat counters</p>
+          <p className="text-xs text-slate-400 mt-0.5 tracking-wide">The hero stat band is now managed on its own page.</p>
         </div>
+        <Link href="/fryo-kanji/content/stats" className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold hover:text-gold-light border border-gold/30 hover:border-gold/50 rounded-lg px-3 py-2 transition-colors tracking-wide shrink-0">
+          Edit Stats Counters <ExternalLink className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       <button type="submit" disabled={pending} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold hover:bg-gold-light text-navy text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-gold/20 tracking-wide disabled:opacity-60">

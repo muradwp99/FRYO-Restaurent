@@ -41,7 +41,15 @@ export function AboutValues() {
         gsap.to(icon, { y: -6, repeat: -1, yoyo: true, duration: 1.8 + i * 0.2, ease: "sine.inOut" });
       });
     }, el);
-    return () => ctx.revert();
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.trigger === el || trigger.vars?.trigger === el) {
+          trigger.kill();
+        }
+      });
+      ctx.revert();
+      ScrollTrigger.refresh();
+    };
   }, []);
 
   return (

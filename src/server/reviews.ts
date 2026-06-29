@@ -42,6 +42,20 @@ export async function getHomeTestimonials(): Promise<Testimonial[]> {
     .map((r) => ({ name: r.customer, text: r.comment, stars: Math.round(r.rating) }));
 }
 
+/** All approved reviews (newest first) — public-facing. */
+export async function getApprovedReviews(): Promise<AdminReview[]> {
+  return (await listReviews()).filter((r) => r.status === "Approved");
+}
+
+/** Approved reviews for a specific menu item (best-effort name match). */
+export async function getApprovedReviewsForItem(itemName: string): Promise<AdminReview[]> {
+  const n = itemName.trim().toLowerCase();
+  return (await getApprovedReviews()).filter((r) => {
+    const item = r.item.toLowerCase();
+    return item === n || item.includes(n) || n.includes(item);
+  });
+}
+
 export type ReviewInput = Omit<AdminReview, "id" | "helpful"> & { id?: string; helpful?: number };
 
 export async function saveReview(input: ReviewInput): Promise<AdminReview> {
