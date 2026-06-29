@@ -19,8 +19,9 @@ import type { RowDataPacket } from "mysql2";
 
 const TABLE = "fryo_store";
 let tableReady = false;
-/** Once MySQL proves unavailable at runtime, stop retrying it for this process. */
-let dbDisabled = false;
+/** If MySQL errors, briefly back off (don't permanently disable the whole process). */
+let dbCooldownUntil = 0;
+const DB_COOLDOWN_MS = 15_000;
 
 async function ensureTable(): Promise<void> {
   if (tableReady) return;
@@ -36,7 +37,7 @@ async function ensureTable(): Promise<void> {
 }
 
 function useDb(): boolean {
-  return dbConfigured() && !dbDisabled;
+  return dbConfigured() && Date.now() >= dbCooldownUntil;
 }
 
 async function dbReadRaw(name: string): Promise<string | null> {
@@ -88,7 +89,7 @@ async function readRaw(name: string): Promise<string | null> {
       return await dbReadRaw(name);
     } catch (err) {
       console.error(`[store] MySQL read failed for "${name}" — falling back to file store.`, err);
-      dbDisabled = true;
+      dbCooldownUntil = Date.now() + DB_COOLDOWN_MS;
     }
   }
   return fileRead(name);
@@ -101,7 +102,7 @@ async function writeRaw(name: string, json: string): Promise<void> {
       return;
     } catch (err) {
       console.error(`[store] MySQL write failed for "${name}" — falling back to file store.`, err);
-      dbDisabled = true;
+      dbCooldownUntil = Date.now() + DB_COOLDOWN_MS;
     }
   }
   await fileWrite(name, json);
